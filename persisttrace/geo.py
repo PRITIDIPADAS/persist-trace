@@ -131,6 +131,9 @@ def fetch_primary(acc, cfg, raw_dir, manifest):
     c_url = g["counts_url"].format(acc=acc)
     try:
         out["counts"] = download(c_url, raw_dir / f"{acc}_raw_counts_GRCh38.p13_NCBI.tsv.gz")
+        if out["counts"].read_bytes()[:2] != b"\x1f\x8b":
+            out.pop("counts").unlink()
+            raise RuntimeError("NCBI returned a web page instead of a counts file")
         manifest.add(acc, "ncbi_raw_counts", c_url, out["counts"])
         a_url = g["annot_url"]
         out["annot"] = download(a_url, raw_dir / "Human.GRCh38.p13.annot.tsv.gz")
@@ -139,5 +142,71 @@ def fetch_primary(acc, cfg, raw_dir, manifest):
     except RuntimeError as err:
         url, names = list_suppl(acc, g["suppl_url"], raw_dir / "suppl_index.html")
         out["suppl_names"] = names
-        out["source"] = f"ncbi_counts_unavailable: {err}"
+        out["source"] = f"author supplementary files ({err})"
+        ranked = sorted(names, key=lambda n: (0 if "count" in n.lower() else 1 if re.search(r"\.(txt|tsv|csv)(\.gz)?$|\.xlsx?$", n, re.I) else 2, n))
+        for name in ranked:
+            if not re.search(r"\.(txt|tsv|csv)(\.gz)?$|\.xlsx?$", name, re.I):
+                continue
+            f_url = url + name
+            path = download(f_url, raw_dir / name)
+            manifest.add(acc, "author_supplementary", f_url, path)
+            out.setdefault("suppl_files", []).append(path)
     return out
+
+
+def read_table_any(path):
+    path = Path(path)
+    name = path.name.lower()
+    if name.endswith((".xlsx", ".xls")):
+        return pd.read_excel(path, index_col=0)
+    return pd.read_csv(path, sep=None, engine="python", index_col=0, compression="infer")
+
+
+def _norm(s):
+    return re.sub(r"[^a-z0-9]", "", str(s).lower().replace("[rnaseq]", ""))
+
+
+def read_author_counts(paths, samples):
+    """Find the supplementary table whose columns match the sample titles; return genes x GSM counts."""
+    want = {_norm(t.split("[")[0]): g for t, g in zip(samples.title, samples.gsm)}
+    want.update({_norm(g): g for g in samples.gsm})
+    report = []
+    for p in paths:
+        try:
+            df = read_table_any(p)
+        except Exception as err:
+            report.append(f"{Path(p).name}: unreadable ({err})")
+            continue
+        report.append(f"{Path(p).name}: shape {df.shape}; columns {list(df.columns[:8])}; index {list(df.index[:5])}")
+        mapping = {c: want[_norm(c)] for c in df.columns if _norm(c) in want}
+        if len(set(mapping.values())) >= len(samples):
+            num = df[list(mapping)].apply(pd.to_numeric, errors="coerce")
+            num.columns = [mapping[c] for c in num.columns]
+            num = num.loc[:, ~num.columns.duplicated()].dropna(how="all").fillna(0)
+            num.index = num.index.astype(str)
+            return num.round().clip(lower=0).astype(int), report, Path(p).name
+    return None, report, None
+
+
+HGNC_URLS = [
+    "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt",
+    "https://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt",
+]
+
+
+def symbol_table(index, raw_dir, manifest):
+    """Map gene IDs to symbols. Ensembl IDs are mapped through HGNC; anything else is kept as is."""
+    ids = pd.Index(index).astype(str)
+    stripped = ids.str.replace(r"\.\d+$", "", regex=True)
+    if not stripped.str.startswith("ENSG").mean() > 0.5:
+        return pd.DataFrame({"Symbol": ids.str.split("|").str[-1]}, index=ids)
+    for url in HGNC_URLS:
+        try:
+            path = download(url, Path(raw_dir) / "hgnc_complete_set.txt")
+            manifest.add("HGNC", "gene_symbols", url, path)
+            h = pd.read_csv(path, sep="\t", usecols=["symbol", "ensembl_gene_id"], low_memory=False).dropna()
+            m = dict(zip(h.ensembl_gene_id, h.symbol))
+            return pd.DataFrame({"Symbol": [m.get(s, s) for s in stripped]}, index=ids)
+        except Exception:
+            continue
+    return pd.DataFrame({"Symbol": stripped}, index=ids)

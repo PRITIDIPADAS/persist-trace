@@ -9,3 +9,4 @@ matplotlib==3.11.2
 pyyaml==6.0.3
 decoupler==2.3.1
 pytest
+openpyxl==3.1.5

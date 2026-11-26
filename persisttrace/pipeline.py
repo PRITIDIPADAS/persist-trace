@@ -29,16 +29,28 @@ def load(cfg, source, work):
     man.write()
     matrix = geo.parse_series_matrix(got["matrix"])
     matrix.to_csv(work / "manifests" / "series_matrix_samples.csv", index=False)
-    if "counts" not in got:
-        raise SystemExit(f"NCBI uniform counts unavailable ({got['source']}); supplementary files: {got.get('suppl_names')}")
-    counts, annot = geo.read_ncbi_counts(got["counts"], got.get("annot"))
     try:
         sample_df = smp.build_sample_table(matrix, cfg["design"])
     except smp.MetadataError as err:
         dbg = pd.DataFrame([{"gsm": r.geo_accession, "text": smp._text(r)} for _, r in matrix.iterrows()])
         dbg.to_csv(work / "manifests" / "metadata_debug.csv", index=False)
+        man.write()
         raise SystemExit(f"metadata parsing failed: {err}")
+    if "counts" in got:
+        counts, annot = geo.read_ncbi_counts(got["counts"], got.get("annot"))
+        got["counts_file"] = Path(got["counts"]).name
+    else:
+        counts, report, fname = geo.read_author_counts(got.get("suppl_files", []), sample_df)
+        (work / "manifests" / "suppl_report.txt").write_text(
+            "supplementary files: " + ", ".join(got.get("suppl_names", [])) + "\n" + "\n".join(report))
+        if counts is None:
+            man.write()
+            raise SystemExit("no supplementary table matched the 60 sample titles; see suppl_report.txt")
+        got["counts_file"] = fname
+        annot = geo.symbol_table(counts.index, work / "raw", man)
+    man.write()
     counts = smp.align_counts(counts, sample_df)
+    log(f"counts: {counts.shape[0]} genes x {counts.shape[1]} samples from {got['counts_file']}")
     return counts, annot, sample_df, pd.DataFrame(man.rows), got
 
 
@@ -301,7 +313,8 @@ def main(argv=None):
                  "n_genes_tested": int(len(genes_common)), "cell_lines": lines,
                  "conditions": CONDITION_LABELS, "pca_variance": [_r(v) for v in var],
                  "pca_raw_variance": [_r(v) for v in raw_var],
-                 "networks": {"hallmark": set_origin, "collectri": net_origin}},
+                 "networks": {"hallmark": set_origin, "collectri": net_origin},
+                 "counts_source": got.get("source"), "counts_file": got.get("counts_file")},
         "manifest": manifest.to_dict("records") if len(manifest) else [],
         "samples": sample_points,
         "betas": {l: _r(b) for l, b in betas.items()},

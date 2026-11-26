@@ -76,7 +76,7 @@ def validate(df, design):
     bad = df[df.cell_line.isna() | df.condition.isna()]
     if len(bad):
         problems.append(f"{len(bad)} samples could not be labelled: {list(bad.gsm)[:8]}")
-    counts = df.dropna().groupby(["cell_line", "condition"]).size()
+    counts = df.dropna(subset=["cell_line", "condition"]).groupby(["cell_line", "condition"]).size()
     exp = design["expected_replicates"]
     for line in design["cell_lines"]:
         for cond in design["conditions"]:

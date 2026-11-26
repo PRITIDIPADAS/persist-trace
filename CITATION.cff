@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: "PersistTrace: a reversibility-aware evidence framework for drug-tolerant persister states in EGFR-mutant lung cancer"
+authors:
+  - name: PRITIDIPADAS
+version: 1.0.0
+date-released: 2026-11-26
+license: MIT
+repository-code: https://github.com/PRITIDIPADAS/persist-trace
+references:
+  - type: article
+    title: The landscape of therapeutic vulnerabilities in EGFR inhibitor osimertinib drug tolerant persister cells
+    doi: 10.1038/s41698-022-00337-w
