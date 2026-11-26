@@ -42,6 +42,10 @@ jobs:
         continue-on-error: true
         run: python -m persisttrace.pipeline --source geo --work build --site site 2>&1 | tee pipeline.log; exit ${PIPESTATUS[0]}
 
+      - name: Explainer film
+        if: steps.pipeline.outcome == 'success'
+        run: python -m persisttrace.film --results site/data/results.json --out site/media/explainer.mp4 --poster site/media/explainer.jpg
+
       - name: Octave cross-check
         if: steps.pipeline.outcome == 'success'
         run: |

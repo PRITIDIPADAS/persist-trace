@@ -28,8 +28,16 @@ def _prefix(df):
     return df
 
 
+PINNED_HALLMARK = Path(__file__).resolve().parents[1] / "evidence" / "hallmark_sets.csv.gz"
+
+
 def load_hallmark(cache):
-    df, origin = _load_hallmark(cache)
+    try:
+        df, origin = _load_hallmark(cache)
+    except Exception as err:
+        if not PINNED_HALLMARK.exists():
+            raise
+        df, origin = pd.read_csv(PINNED_HALLMARK), f"MSigDB hallmark, pinned copy (download failed: {err})"
     return _prefix(df), origin
 
 
@@ -50,11 +58,19 @@ def _load_hallmark(cache):
     return _cache(cache, loader)
 
 
+PINNED_COLLECTRI = Path(__file__).resolve().parents[1] / "evidence" / "collectri_regulons.csv.gz"
+
+
 def load_collectri(cache):
+    """CollecTRI regulons. A copy of Zenodo record 8192729 is pinned in the repository so a
+    Zenodo outage cannot silently drop the regulator analysis."""
+    if PINNED_COLLECTRI.exists():
+        return pd.read_csv(PINNED_COLLECTRI), "CollecTRI, Zenodo 8192729 (pinned copy in evidence/)"
+
     def loader():
         import decoupler as dc
         df = dc.op.collectri(organism="human")
-        return df[["source", "target", "weight"]], "decoupler/omnipath CollecTRI"
+        return df[["source", "target", "weight"]], "decoupler CollecTRI"
     return _cache(cache, loader)
 
 

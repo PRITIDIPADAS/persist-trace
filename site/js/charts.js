@@ -1,9 +1,10 @@
 const PT = (() => {
   const NS = "http://www.w3.org/2000/svg";
-  const COLORS = { control: "#7dd3fc", acute: "#fbbf24", dtp: "#e879f9", wo_short: "#a78bfa", wo_long: "#34d399" };
+  const COLORS = { control: "#3c6e8f", acute: "#c48a2a", dtp: "#9e2a3a", wo_short: "#6f5a9a", wo_long: "#4c7a4f" };
+  const NIGHT = { control: "#8db4cf", acute: "#e0ad55", dtp: "#d9707b", wo_short: "#a693cf", wo_long: "#86b38a" };
   const ORDER = ["control", "acute", "dtp", "wo_short", "wo_long"];
   const SHORT = { control: "Control", acute: "Acute 24 h", dtp: "Persister 21 d", wo_short: "Washout 24 h", wo_long: "Regrowth" };
-  const LINE_COLORS = { PC9: "#7dd3fc", H1975: "#fbbf24", HCC827: "#e879f9", HCC2935: "#34d399" };
+  const LINE_COLORS = { PC9: "#3c6e8f", H1975: "#c48a2a", HCC827: "#9e2a3a", HCC2935: "#4c7a4f" };
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function el(tag, attrs = {}, parent) {
@@ -78,7 +79,7 @@ const PT = (() => {
 
   function button(label, on, onClick) {
     const b = document.createElement("button");
-    b.className = "btn small" + (on ? " on" : "");
+    b.className = "ghost" + (on ? " on" : "");
     b.type = "button";
     b.textContent = label;
     b.setAttribute("aria-pressed", on ? "true" : "false");
@@ -103,5 +104,5 @@ const PT = (() => {
 
   function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-  return { el, clear, scale, extent, ticks, axes, fmt, showTip, hideTip, button, group, esc, COLORS, ORDER, SHORT, LINE_COLORS, reduced };
+  return { el, clear, scale, extent, ticks, axes, fmt, showTip, hideTip, button, group, esc, COLORS, NIGHT, ORDER, SHORT, LINE_COLORS, reduced };
 })();

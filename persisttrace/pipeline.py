@@ -182,13 +182,16 @@ def main(argv=None):
             regulons, net_origin = programs.load_collectri(work / "raw" / "collectri.csv")
         except Exception as err:
             net_origin = f"failed: {err}"
+            log(net_origin)
     zS_sym = pd.Series(mS.z.values, index=sym.reindex(mS.index).values).groupby(level=0).mean()
     zP_sym = pd.Series(mP.z.values, index=sym.reindex(mP.index).values).groupby(level=0).mean()
     if sets is not None:
         prog_S = programs.program_scores(zS_sym, sets)
         prog_P = programs.program_scores(zP_sym, sets)
     if regulons is not None:
+        log(f"regulons: {regulons.shape}, columns {list(regulons.columns)}")
         tf_scores = programs.ulm(zS_sym, regulons, min_n=10)
+        log(f"tf activity rows: {len(tf_scores)}")
         tf_scores.to_csv(work / "tables" / "tf_activity_persister_specific.csv")
     lc = contrasts.log_cpm(counts)
     lc_sym = lc.groupby(sym.reindex(lc.index).values).mean()
@@ -306,7 +309,18 @@ def main(argv=None):
         h.append({"id": "H7", "text": "The persister-specific signature, frozen from cell lines, marks residual tumour cells in patient-derived xenografts after six weeks of osimertinib.",
                   "metric": "mean AUROC, residual vs untreated tumour cells, two PDXs (GSE243562)", "naive": float(mn), "decomposed": float(md),
                   "result": "supported" if md > 0.6 else "not supported",
-                  "note": "Post hoc addition after the first run; signature frozen before these data were read."})
+                  "note": f"Post hoc, added after the first run; signatures frozen before these data were read. Both transfer in vivo "
+                          f"(naive {mn:.2f}, stress-removed {md:.2f}), so removing stress gives no extra edge here."})
+    cc = external.get("cell_cycle_sorted") if external else None
+    if cc:
+        sh = pd.DataFrame(cc["summary"])
+        ratio = {sg: float(g["shift"].min() / g["shift"].max()) if g["shift"].max() > 0 else None for sg, g in sh.groupby("signature")}
+        h.append({"id": "H8", "text": "The stress-removed signature marks persisters equally in G1, S and G2, so cycling persisters carry it too.",
+                  "metric": "smallest / largest day-28 shift across sorted phases (GSE335846); 1 means identical",
+                  "naive": ratio.get("naive_treated_vs_control"), "decomposed": ratio.get("persister_specific"),
+                  "result": "supported" if (ratio.get("persister_specific") or 0) > 0.7 and (ratio.get("persister_specific") or 0) > (ratio.get("naive_treated_vs_control") or 0) else "not supported",
+                  "note": "Post hoc, added after the first run. Shifts per phase: " + ", ".join(
+                      f"{r.signature.split('_')[0]} {r.phase} {r['shift']:+.2f}" for _, r in sh.iterrows())})
     lit_ids = {g: symbol_to_id[g] for g in lit_recs.gene.unique() if g in symbol_to_id}
     ranks = [{"gene": g, "naive_percentile": rank_percentile(mP, i), "persister_specific_percentile": rank_percentile(mS, i)}
              for g, i in lit_ids.items()]
