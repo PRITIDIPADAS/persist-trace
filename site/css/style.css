@@ -155,6 +155,12 @@ footer .boundary { color: var(--ink); max-width: 60em; }
 
 @media (max-width: 960px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
+  .hero { gap: 14px; }
+  .hero > div:first-child { display: contents; }
+  .hero h1 { order: 1; margin: 0; }
+  .hero .stage { order: 2; }
+  .hero .stats { order: 3; }
+  .hero .lede { order: 4; font-size: 15px; }
   .hero, .grid2, .mod-head, .passport { grid-template-columns: 1fr; }
   .grid3, .dims { grid-template-columns: 1fr 1fr; }
   .hyp { grid-template-columns: 44px 1fr; }

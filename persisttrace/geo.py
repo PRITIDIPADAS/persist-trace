@@ -135,10 +135,17 @@ def fetch_primary(acc, cfg, raw_dir, manifest):
             out.pop("counts").unlink()
             raise RuntimeError("NCBI returned a web page instead of a counts file")
         manifest.add(acc, "ncbi_raw_counts", c_url, out["counts"])
+        out["source"] = "NCBI GEO uniform counts (GRCh38.p13)"
         a_url = g["annot_url"]
-        out["annot"] = download(a_url, raw_dir / "Human.GRCh38.p13.annot.tsv.gz")
-        manifest.add("GRCh38.p13", "ncbi_gene_annotation", a_url, out["annot"])
-        out["source"] = "ncbi_uniform_counts"
+        try:
+            a = download(a_url, raw_dir / "Human.GRCh38.p13.annot.tsv.gz")
+            if a.read_bytes()[:2] == b"\x1f\x8b":
+                out["annot"] = a
+                manifest.add("GRCh38.p13", "ncbi_gene_annotation", a_url, a)
+            else:
+                a.unlink()
+        except RuntimeError:
+            pass
     except RuntimeError as err:
         url, names = list_suppl(acc, g["suppl_url"], raw_dir / "suppl_index.html")
         out["suppl_names"] = names
@@ -198,14 +205,27 @@ def symbol_table(index, raw_dir, manifest):
     """Map gene IDs to symbols. Ensembl IDs are mapped through HGNC; anything else is kept as is."""
     ids = pd.Index(index).astype(str)
     stripped = ids.str.replace(r"\.\d+$", "", regex=True)
-    if not stripped.str.startswith("ENSG").mean() > 0.5:
+    key = "ensembl_gene_id" if stripped.str.startswith("ENSG").mean() > 0.5 else (
+        "entrez_id" if stripped.str.fullmatch(r"\d+").mean() > 0.5 else None)
+    if key is None:
         return pd.DataFrame({"Symbol": ids.str.split("|").str[-1]}, index=ids)
+    if key == "entrez_id":
+        url = "https://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz"
+        try:
+            path = download(url, Path(raw_dir) / "Homo_sapiens.gene_info.gz")
+            manifest.add("NCBI Gene", "gene_symbols", url, path)
+            h = pd.read_csv(path, sep="\t", usecols=["GeneID", "Symbol"], dtype=str)
+            m = dict(zip(h.GeneID, h.Symbol))
+            return pd.DataFrame({"Symbol": [m.get(s, s) for s in stripped]}, index=ids)
+        except Exception:
+            pass
     for url in HGNC_URLS:
         try:
             path = download(url, Path(raw_dir) / "hgnc_complete_set.txt")
             manifest.add("HGNC", "gene_symbols", url, path)
-            h = pd.read_csv(path, sep="\t", usecols=["symbol", "ensembl_gene_id"], low_memory=False).dropna()
-            m = dict(zip(h.ensembl_gene_id, h.symbol))
+            h = pd.read_csv(path, sep="\t", usecols=["symbol", key], dtype=str, low_memory=False).dropna()
+            h[key] = h[key].str.replace(r"\.0$", "", regex=True)
+            m = dict(zip(h[key], h.symbol))
             return pd.DataFrame({"Symbol": [m.get(s, s) for s in stripped]}, index=ids)
         except Exception:
             continue

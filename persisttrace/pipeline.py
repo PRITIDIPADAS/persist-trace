@@ -38,6 +38,8 @@ def load(cfg, source, work):
         raise SystemExit(f"metadata parsing failed: {err}")
     if "counts" in got:
         counts, annot = geo.read_ncbi_counts(got["counts"], got.get("annot"))
+        if annot is None:
+            annot = geo.symbol_table(counts.index, work / "raw", man)
         got["counts_file"] = Path(got["counts"]).name
     else:
         counts, report, fname = geo.read_author_counts(got.get("suppl_files", []), sample_df)
