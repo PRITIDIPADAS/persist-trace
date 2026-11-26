@@ -32,4 +32,4 @@ def test_no_unsupported_claims_in_public_text():
 def test_no_em_dashes_in_public_text():
     for f in list((ROOT / "site").rglob("*.html")) + list((ROOT / "docs").glob("*.md")) + [ROOT / "README.md"]:
         if f.exists():
-            assert "—" not in f.read_text(), f"em dash in {f}"
+            assert "\u2014" not in f.read_text(), f"em dash in {f}"

@@ -375,7 +375,17 @@
     $("toRev").addEventListener("click", () => { window.PTdrawGene(p.symbol); location.hash = "reversibility"; });
   }
 
+  function trop2Line() {
+    const p = passports.find(q => q.symbol === "TACSTD2");
+    if (!p) return;
+    const up = Object.entries(p.per_line).filter(([, v]) => v.P > 0.5).map(([l]) => l);
+    const flat = Object.entries(p.per_line).filter(([, v]) => v.P <= 0.5).map(([l]) => l);
+    const acuteShare = Object.values(p.per_line).filter(v => v.P > 0.5).map(v => v.A / v.P);
+    $("trop2Plain").insertAdjacentHTML("beforeend", ` In these 60 samples it rose in persisters of ${up.join(" and ") || "no line"}${flat.length ? ` but not in ${flat.join(" or ")}` : ""}${acuteShare.length && Math.min(...acuteShare) > 0.7 ? ", and most of that rise is already there after 24 h of drug" : ""}.`);
+  }
+
   function passportPanel() {
+    trop2Line();
     const labels = [...new Set(passports.map(p => p.claim.label))];
     $("claimFilter").innerHTML += labels.map(l => `<option>${esc(l)}</option>`).join("");
     const rank = { contested: 0, dependency: 1, negative: 2, regulator: 3, marker: 4, stress: 5, weak: 6 };
