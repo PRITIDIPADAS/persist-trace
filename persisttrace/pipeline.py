@@ -104,6 +104,7 @@ def main(argv=None):
     ap.add_argument("--site", default="site")
     ap.add_argument("--skip-networks", action="store_true")
     ap.add_argument("--skip-media", action="store_true")
+    ap.add_argument("--skip-external", action="store_true")
     args = ap.parse_args(argv)
 
     cfg = yaml.safe_load((ROOT / "config" / "analysis.yaml").read_text())
@@ -231,6 +232,21 @@ def main(argv=None):
     lolo = robustness.leave_one_line_out(per_line, cfg["benchmark"]["signature_size"])
     beta_sens = robustness.beta_sensitivity(results)
 
+    external = {}
+    if args.source == "geo" and not args.skip_external:
+        log("external validation: GSE335846, GSE275199, GSE243562")
+        sig_sym = {}
+        for name, (u, d) in {"naive_treated_vs_control": decompose.signature(mP, cfg["benchmark"]["signature_size"]),
+                             "persister_specific": decompose.signature(mS, cfg["benchmark"]["signature_size"], anchor=mP)}.items():
+            sig_sym[name] = ([sym.get(g, g) for g in u], [sym.get(g, g) for g in d])
+        from . import external as ext
+        ext_man = geo.Manifest(work / "manifests" / "external_manifest.csv")
+        external = ext.run(work, ext_man, sig_sym, set_map, cfg["seed"])
+        ext_man.write()
+        external["signatures"] = {k: {"up": v[0], "down": v[1]} for k, v in sig_sym.items()}
+        external["manifest"] = ext_man.rows
+        (work / "external_summary.json").write_text(json.dumps(_clean({k: v for k, v in external.items() if k != "signatures"}), indent=1)[:200000])
+
     log("embedding")
     genes_common = sorted(set.intersection(*[set(per_line[l].index) for l in lines]))
     zc = benchmark.centre_by_line(lc.loc[genes_common], sample_df)
@@ -268,9 +284,29 @@ def main(argv=None):
     h.append({"id": "H4", "text": "Some strong persister markers lack evidence that they are needed for persister formation.",
               "metric": "passports labelled marker-without-support or contested", "genes": marker_neg,
               "result": "supported" if marker_neg else "not supported in this run"})
-    h.append({"id": "H5", "text": "Different persister subpopulations coexist.",
-              "result": "not testable with bulk RNA-seq",
-              "note": "Needs single-cell data (GSE243562, GSE275199). Planned, not run."})
+    sc = external.get("pc9_single_cell") if external else None
+    if sc:
+        cyc = sc.get("cycling_fraction_exposed")
+        bim = sc.get("bimodality_delta_bic")
+        h.append({"id": "H5", "text": "Different persister subpopulations coexist.",
+                  "metric": "PC9 single cells under osimertinib (GSE275199): cycling fraction and bimodality of the persister score",
+                  "value": None,
+                  "result": "supported" if (cyc is not None and 0.05 < cyc < 0.95) or (bim is not None and bim > 10) else "not supported",
+                  "note": f"{sc['exposed_cells']} drug-exposed PC9 cells; {cyc * 100:.0f}% in a cycling state; "
+                          f"delta BIC for two vs one component {bim:.0f}. Drug exposure inferred from MAPK output (hashtags not public)."
+                          if cyc is not None and bim is not None else "Single-cell run incomplete."})
+    else:
+        h.append({"id": "H5", "text": "Different persister subpopulations coexist.",
+                  "result": "not evaluated", "note": "Single-cell validation did not run in this build."})
+    pdx = external.get("pdx_single_cell") if external else None
+    if pdx:
+        a = pdx["auroc_residual_vs_untreated"]
+        mn = np.nanmean([v for v in a.get("naive_treated_vs_control", {}).values() if v is not None])
+        md = np.nanmean([v for v in a.get("persister_specific", {}).values() if v is not None])
+        h.append({"id": "H7", "text": "The persister-specific signature, frozen from cell lines, marks residual tumour cells in patient-derived xenografts after six weeks of osimertinib.",
+                  "metric": "mean AUROC, residual vs untreated tumour cells, two PDXs (GSE243562)", "naive": float(mn), "decomposed": float(md),
+                  "result": "supported" if md > 0.6 else "not supported",
+                  "note": "Post hoc addition after the first run; signature frozen before these data were read."})
     lit_ids = {g: symbol_to_id[g] for g in lit_recs.gene.unique() if g in symbol_to_id}
     ranks = [{"gene": g, "naive_percentile": rank_percentile(mP, i), "persister_specific_percentile": rank_percentile(mS, i)}
              for g, i in lit_ids.items()]
@@ -341,6 +377,8 @@ def main(argv=None):
                        "labels": {"threshold_agreement": robustness.label(grid.agreement_with_reference.min()),
                                   "signature_lolo": robustness.label(lolo.jaccard_top.min(), 0.5, 0.3)}},
         "hypotheses": h, "gates": gates, "qc": qc_df.to_dict("records"),
+        "external": {k: v for k, v in external.items() if k not in ("signatures",)},
+        "signatures": external.get("signatures", {}),
         "sources": sources,
     }
     site = Path(args.site) / "data"

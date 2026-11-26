@@ -15,7 +15,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     env:
       PYTHONHASHSEED: "0"
       MPLBACKEND: Agg
@@ -58,7 +58,7 @@ jobs:
           cp -f pipeline.log test_unit.log public/debug/ 2>/dev/null || true
           cp -f test_octave.log public/debug/ 2>/dev/null || true
           cp -rf build/manifests public/debug/ 2>/dev/null || true
-          cp -f build/results_summary.json public/debug/ 2>/dev/null || true
+          cp -f build/results_summary.json build/external_summary.json public/debug/ 2>/dev/null || true
           cp -rf build/octave public/debug/ 2>/dev/null || true
           mkdir -p public/debug/raw && cp -f build/raw/*.gz build/raw/*.csv public/debug/raw/ 2>/dev/null || true
           cp -f build/figures/*.svg public/figures/ 2>/dev/null || true
