@@ -1,6 +1,6 @@
 # Weaknesses in the original plan, and what changed
 
-The original PERSIST-TRACE roadmap was ambitious and mostly sound. Reviewed against the literature and the actual data, it had problems that a sharp judge would find in a few minutes. This file lists them and what the build does about each one.
+The original PERSIST-TRACE roadmap was ambitious and mostly sound. Reviewed against the literature and the actual data, it had problems that a careful reviewer would find in a few minutes. This file lists them and what the build does about each one.
 
 ## 1. Scientific weaknesses
 
@@ -43,7 +43,7 @@ scGPT and Geneformer are single-cell models. Running them on 60 bulk samples wou
 
 * "PERSIST-TRACE" contained a hyphen. The project name is now PersistTrace. The repository URL keeps its original slug because it already existed.
 * The proposed images were third-party photos from news and company sites. They cannot be reused. Every visual on the site is generated from the data or drawn in code.
-* The pitch leaned on scale ("hundreds of models"). Judges from other fields reward one clear question, one clean test and one honest surprise. The site is built around that.
+* The pitch leaned on scale ("hundreds of models"). Readers from other fields respond to one clear question, one clean test and one honest surprise. The site is built around that.
 
 ## 5. What makes the build distinctive
 

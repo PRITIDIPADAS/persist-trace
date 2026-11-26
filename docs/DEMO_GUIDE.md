@@ -1,4 +1,4 @@
-# Judge playbook
+# Demo guide
 
 ## The 15-second version
 
@@ -23,7 +23,7 @@
 | 1:30 | Passport, TROP2 | "A 2025 knockout said TROP2 is a passenger. A 2026 paper says it helps persisters survive. Different outcomes, different models. My system calls it contested instead of picking a side." |
 | 1:50 | Validation arena | "Here is the preregistered test on an unseen cell line, including where my idea did not win." |
 
-## Angles for judges outside cancer biology
+## Angles from other fields
 
 * **Physicist or engineer:** the switching model is a 2x2 linear system; relapse is decided by the sign of the largest eigenvalue. The memory half-life is a first-order decay fit.
 * **Statistician:** random-effects meta-analysis across cell lines, held-out-line validation, bootstrap intervals, robustness grid, no cell-level pseudoreplication.
@@ -31,7 +31,7 @@
 * **Clinician:** the claim boundary. Nothing here is treatment advice. Cell lines are not patients.
 * **Chemist:** osimertinib binds EGFR covalently; persisters survive without the T790M or C797S style mutations, which is why a non-genetic explanation is needed.
 
-## Questions to expect
+## Questions a reader may ask
 
 **What is new here?** The combination: an explicit stress-versus-persistence decomposition, population-level reversibility with memory half-lives, and passports that keep markers apart from mechanisms. Persister signatures from machine learning already exist (Chang et al. 2026), so that is not the claim.
 
@@ -45,23 +45,18 @@
 
 **What would you do with a lab?** Test the top persister-specific genes that have no perturbation record yet, with knockdowns measured for both DTP formation and DTP maintenance, since TROP2 shows those can differ.
 
-## Board layout (if a poster is required)
-
-Left column: the hook question, one sentence on persisters, the five-condition design. Centre: the decomposition plot and the memory histogram. Right: the TROP2 passport and the H1 result. Bottom strip: QR code to the live site and the claim boundary sentence.
-
 ## Three results to say out loud
 
 1. **Remove the stress and the signal travels.** On a held-out cell line, a naive signature told persisters from 24-hour samples with a mean AUROC of 0.61 (and ranked HCC827 backwards, 0.11). The stress-removed signature scored 1.00 in all four folds, on three against three samples per fold.
 2. **Cycling persisters are persisters too.** In PC9 cells sorted by cell-cycle phase after 28 days of osimertinib (GSE335846), the stress-removed score rose by +2.04 in G1, +1.75 in S and +1.93 in G2. The naive score rose by +2.32 in G1 but only +0.69 in S. In 2,864 drug-exposed PC9 single cells, 23% were still cycling and the persister score did not track cycling (Spearman 0.04).
 3. **The memory is long.** After regrowth, 58% (PC9) to about 100% (H1975) of each persister change was still there. Fitted half-lives run from about 8 to 22 days.
 
-## The honest losses (say these before a judge finds them)
+## The honest losses (state these first)
 
 * The stress-removed genes replicate less often across lines than naive genes.
 * In PDX tumours both signatures work about equally (AUROC about 0.70).
 * Classifiers did not improve.
 
-## Film and deck
+## Film
 
 * The 56-second film on Plate III is rendered from the results file by `persisttrace/film.py`.
-* The eight-slide deck lives as a Claude Slides artifact; its link is in the README.

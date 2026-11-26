@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-UA = {"User-Agent": "PersistTrace/1.0 (science fair research; contact via GitHub PRITIDIPADAS)"}
+UA = {"User-Agent": "PersistTrace/1.0 (research; contact via GitHub PRITIDIPADAS)"}
 
 
 def series_stub(acc):

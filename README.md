@@ -6,7 +6,7 @@
 
 Lung cancers with EGFR mutations often respond to osimertinib, yet a few cells survive without any new mutation. These drug-tolerant persisters change state instead of DNA, and they can seed relapse. PersistTrace asks which of their changes are the persister state itself, which are just day-one drug stress, and which fade once the drug is stopped. Every candidate gene then gets an evidence passport saying how far the evidence actually goes.
 
-**Pritidipa Das · Team Skibidi Solo · CGWC**
+**Pritidipa Das (PRITIDIPADAS)**
 
 **Live observatory:** https://pritidipadas.github.io/persist-trace/  
 **Explainer film (56 s):** https://pritidipadas.github.io/persist-trace/media/explainer.mp4  
@@ -74,13 +74,13 @@ config/         every threshold in one file
 site/           the observatory (vanilla JS, canvas and SVG, no build step, works offline)
 tests/          scientific invariants: no edge without a source, no dependency without a perturbation record,
                 no held-out leakage, no unsupported claims or em dashes in public text
-docs/           protocol, claim boundaries, prior art, weaknesses, judge playbook, limitations
+docs/           protocol, claim boundaries, prior art, weaknesses, demo guide, limitations
 ```
 
 ## Documents
 
 * [Weaknesses in the original plan and what changed](docs/WEAKNESSES_AND_UPGRADES.md)
-* [Judge playbook and demo script](docs/JUDGE_PLAYBOOK.md)
+* [Demo guide and script](docs/DEMO_GUIDE.md)
 * [Analysis protocol, frozen before the first real run](docs/ANALYSIS_PROTOCOL.md)
 * [Claim boundaries](docs/CLAIM_BOUNDARIES_AND_EVIDENCE_STANDARD.md)
 * [Prior art and datasets](docs/PRIOR_ART_AND_DATASETS.md)
@@ -99,4 +99,4 @@ Checked against PubMed on 2026-11-26: Criscione 2022 ([doi](https://doi.org/10.1
 
 PersistTrace is a computational research framework for cell-line models. It does not diagnose patients, recommend treatment, show that any gene causes resistance or replace laboratory validation.
 
-MIT licence. Built by Pritidipa Das (PRITIDIPADAS), Team Skibidi Solo, CGWC.
+MIT licence. Built by Pritidipa Das (PRITIDIPADAS).

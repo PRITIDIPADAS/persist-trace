@@ -337,7 +337,7 @@ def main(argv=None):
         "E_robustness": (f"evaluated: classes {robustness.label(grid.agreement_with_reference.min())}, "
                          f"signature {robustness.label(lolo.jaccard_top.min(), 0.5, 0.3)}") if len(grid) and len(lolo) else "not yet evaluated",
         "F_software_reproducibility": "evaluated in CI (see tests)",
-        "G_judge_facing": "evaluated by rehearsal, not by code",
+        "G_presentation": "evaluated by review, not by code",
         "H_release_integrity": "passed" if args.source == "geo" else "synthetic run",
     }
 

@@ -203,7 +203,7 @@ class Film:
 
     def close(self, u, a):
         self.text(8, 5.4, "PersistTrace", 60, INK, a, ha="center")
-        self.text(8, 4.3, "Pritidipa Das · Team Skibidi Solo · CGWC", 26, MUTE, a, "italic", ha="center")
+        self.text(8, 4.3, "Pritidipa Das", 26, MUTE, a, "italic", ha="center")
         self.text(8, 3.4, "pritidipadas.github.io/persist-trace", 22, C["dtp"], a, ha="center")
         self.text(8, 1.6, "A computational study. Not a diagnostic or treatment tool.", 15, MUTE, a, ha="center")
 
