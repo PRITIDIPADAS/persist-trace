@@ -78,7 +78,7 @@ def fit_decay(m_short, m_long, t_short, t_long):
     """Least-squares fit of m(t) = exp(-k t) through m(0)=1 and the two washout points.
 
     Returns k (per day) and half-life, or NaN where the data are not monotone decay."""
-    ts, tl = float(t_short), float(t_long)
+    ts, tl = np.asarray(t_short, float), np.asarray(t_long, float)
     ms, ml = np.asarray(m_short, float), np.asarray(m_long, float)
     ok = (ms > 0.02) & (ml > 0.02) & (ms <= 1.5) & (ml <= 1.5)
     ys = np.log(np.clip(ms, 1e-6, None))

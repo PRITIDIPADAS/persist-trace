@@ -21,7 +21,19 @@ def _cache(path, loader):
     return df, origin
 
 
+def _prefix(df):
+    df = df.copy()
+    df["source"] = df.source.astype(str).str.upper().str.replace(" ", "_")
+    df.loc[~df.source.str.startswith("HALLMARK_"), "source"] = "HALLMARK_" + df.source
+    return df
+
+
 def load_hallmark(cache):
+    df, origin = _load_hallmark(cache)
+    return _prefix(df), origin
+
+
+def _load_hallmark(cache):
     def loader():
         try:
             import decoupler as dc

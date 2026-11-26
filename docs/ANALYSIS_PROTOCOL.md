@@ -37,4 +37,6 @@ A result is called reproducible only if it holds in at least 3 of 4 lines. Verdi
 
 ## Post-hoc changes
 
-None yet.
+* After the first real run (commit 4d653f2), H2 passed its preregistered rule with only 4 genes reversing reproducibly. A note reporting the per-line counts was added. The verdict rule itself was not changed.
+* Gate E now reports the robustness labels instead of "passed", because the first run showed high sensitivity and "passed" would hide that.
+* MSigDB set names from decoupler lacked the HALLMARK_ prefix, so the focus list of programmes did not match. The names were normalised; no statistic changed.

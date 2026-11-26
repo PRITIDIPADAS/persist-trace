@@ -254,7 +254,11 @@ def main(argv=None):
     n_per = dist.get("dtp_persists_after_regrowth", 0)
     h.append({"id": "H2", "text": "Persister programmes differ in how they behave after drug withdrawal.",
               "metric": "reproducible genes per withdrawal class", "classes": dist,
-              "result": "supported" if n_rev > 0 and n_per > 0 else "not supported"})
+              "result": "supported" if n_rev > 0 and n_per > 0 else "not supported",
+              "note": (f"Post hoc: only {n_rev} genes reverse reproducibly in 3 or more lines; "
+                       "reversal is mostly line-specific. " +
+                       ", ".join(f"{l}: {per_cls[l].isin(['dtp_reversed_by_24h', 'dtp_persists_24h_reversed_late']).sum()} reversing genes" for l in lines))
+              if n_rev < 50 else ""})
     tf_sig = int((tf_scores.fdr < 0.05).sum()) if len(tf_scores) else None
     h.append({"id": "H3", "text": "Regulatory inference adds information beyond expression alone.",
               "metric": "TFs with significant persister-specific activity (FDR < 0.05)", "value": tf_sig,
@@ -280,7 +284,8 @@ def main(argv=None):
         "B_analytical_correctness": "passed" if sample_df.groupby(["cell_line", "condition"]).size().eq(3).all() else "failed",
         "C_scientific_interpretation": "passed" if all(e.get("method") for e in egraph["edges"]) else "failed",
         "D_ml_validity": "passed" if len(bench) and set(preds.held_out) == set(lines) else "failed",
-        "E_robustness": "passed" if len(grid) and len(lolo) else "not yet evaluated",
+        "E_robustness": (f"evaluated: classes {robustness.label(grid.agreement_with_reference.min())}, "
+                         f"signature {robustness.label(lolo.jaccard_top.min(), 0.5, 0.3)}") if len(grid) and len(lolo) else "not yet evaluated",
         "F_software_reproducibility": "evaluated in CI (see tests)",
         "G_judge_facing": "evaluated by rehearsal, not by code",
         "H_release_integrity": "passed" if args.source == "geo" else "synthetic run",

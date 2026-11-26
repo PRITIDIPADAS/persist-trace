@@ -133,6 +133,7 @@ math { font-size: 1.05em; }
 .hyp .res { font-weight: 600; text-align: right; }
 .res.supported { color: var(--ok); }
 .res.contradicted { color: var(--warn); }
+.res.partially-supported { color: var(--control); }
 .res.exploratory, .res.not-evaluated, .res.no-clear-difference, .res.not-testable-with-bulk-rna-seq { color: var(--muted); }
 
 table.t { width: 100%; border-collapse: collapse; font-size: 13px; }

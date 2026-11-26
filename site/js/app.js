@@ -32,9 +32,15 @@
   const reproducibleDtp = Object.entries(R.reversibility.distribution).filter(([k]) => k.startsWith("dtp_")).reduce((a, [, v]) => a + v, 0);
   const memLong = R.memory.summary.filter(r => r.timepoint === "wo_long" && r.median_memory !== null).map(r => r.median_memory);
   const memShort = R.memory.summary.filter(r => r.timepoint === "wo_short" && r.median_memory !== null).map(r => r.median_memory);
-  const med = a => a.length ? [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)] : null;
+  const med = a => { if (!a.length) return null; const b = [...a].sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
   const h1 = R.hypotheses.find(h => h.id === "H1");
   const betaMean = Object.values(R.betas).reduce((a, b) => a + b, 0) / lines.length;
+
+  function hlRange() {
+    const h = Object.values(R.memory.decay).map(d => d.median_half_life_days).filter(Number.isFinite);
+    if (!h.length) return "n/a";
+    return `${Math.round(Math.min(...h))} to ${Math.round(Math.max(...h))} d`;
+  }
 
   function heroStats() {
     const stats = [
@@ -42,7 +48,7 @@
       ["", R.meta.n_genes_tested.toLocaleString(), "genes tested in all 4 lines"],
       ["acute", Math.round(betaMean * 100) + "%", "of the acute response still carried by persisters (β)"],
       ["dtp", reproducibleDtp.toLocaleString(), "persister genes reproducible in 3+ lines"],
-      ["dtp", med(memShort) !== null ? Math.round(med(memShort) * 100) + "%" : "n/a", "of the persister change left 24 h after washout"],
+      ["dtp", hlRange(), "median memory half-life after the drug is removed"],
       ["ok", passports.length, "evidence passports"],
     ];
     $("heroStats").innerHTML = stats.map(([c, v, l]) => `<div class="stat ${c}"><b>${v}</b><span>${l}</span></div>`).join("");
@@ -323,6 +329,15 @@
       const lit = (R.programs.literature || []).filter(p => p.program === cur);
       $("progLit").innerHTML = lit.length ? lit.map(p => `<p><b>Published context.</b> ${esc(p.summary)} <a href="https://doi.org/${R.sources[p.source].doi}" target="_blank" rel="noopener">${esc(R.sources[p.source].journal)} ${R.sources[p.source].year}</a></p>`).join("") : "";
     }
+    const rec = p => {
+      const key = progs.find(q => q.replace("HALLMARK_", "") === p);
+      if (!key) return null;
+      const f = lines.map(l => { const v = tc[l][key]; return (v.dtp - v.acute) / ((v.control - v.acute) || 1e-9); }).filter(Number.isFinite);
+      return f.length ? f.reduce((a, b) => a + b, 0) / f.length : null;
+    };
+    const e2f = rec("E2F_TARGETS"), g2m = rec("G2M_CHECKPOINT");
+    const tf = (R.tf_activity || []).find(t => t.source === "E2F1");
+    if (e2f !== null) $("progLit").insertAdjacentHTML("beforebegin", `<p class="sub" style="margin-top:12px"><b>The paradox in numbers.</b> Proliferation programmes collapse after 24 h of drug. In 21-day persisters, E2F targets are on average <b>${Math.round(e2f * 100)}%</b> of the way back to the untreated level${g2m !== null ? ` and G2/M genes <b>${Math.round(g2m * 100)}%</b>` : ""}, while the drug is still on.${tf ? ` Inferred E2F1 activity is higher in persisters than acute stress predicts (score ${fmt(tf.score)}, FDR ${fmt(tf.fdr)}).` : ""} A bulk average cannot say whether all cells restarted slowly or a few restarted fully.</p>`);
     const rows = R.programs.persister_specific || [];
     $("progTable").innerHTML = `<table class="t"><thead><tr><th>Programme</th><th>score</th><th>FDR</th></tr></thead><tbody>${rows.slice(0, 14).map(r => `<tr><td>${nice(r.source)}</td><td class="num">${fmt(r.score)}</td><td class="num">${fmt(r.fdr)}</td></tr>`).join("")}</tbody></table><p class="sub">Score: t-statistic of a linear model of persister-specific z on programme membership. Positive means the programme rises in persisters beyond acute stress.</p>`;
     draw();
@@ -385,10 +400,10 @@
       if (h.value !== undefined && h.value !== null) detail = `${h.value} regulators`;
       if (h.genes) detail = h.genes.join(", ") || "none";
       if (h.ranks) detail = h.ranks.map(r => `${r.gene} ${fmt(r.naive_percentile * 100, 0)}→${fmt(r.persister_specific_percentile * 100, 0)}%`).join(" · ");
-      return `<div class="hyp"><span class="id">${h.id}</span><span>${esc(h.text)}<br><span class="sub">${esc(h.metric || "")}${detail ? ": " + esc(detail) : ""}${h.note ? " " + esc(h.note) : ""}</span></span><span class="res ${slug(h.result)}">${esc(h.result)}</span></div>`;
+      return `<div class="hyp"><span class="id">${h.id}</span><span>${esc(h.text)}<br><span class="sub">${esc(h.metric || "")}${detail ? ": " + esc(detail) : ""}${h.note ? ". " + esc(h.note) : ""}</span></span><span class="res ${slug(h.result)}">${esc(h.result)}</span></div>`;
     }).join("");
     const svg = $("foldChart");
-    const box = { l: 46, r: 450, t: 14, b: 240 };
+    const box = { l: 58, r: 450, t: 14, b: 240 };
     const folds = R.benchmark.folds;
     const x = scale(-.5, folds.length - .5, box.l, box.r), y = scale(0, 1, box.b, box.t);
     axes(svg, x, y, box, { noX: true, ylab: "AUROC" });

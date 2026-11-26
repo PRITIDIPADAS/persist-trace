@@ -62,7 +62,7 @@ jobs:
           cp -rf build/manifests public/debug/ 2>/dev/null || true
           cp -f build/results_summary.json public/debug/ 2>/dev/null || true
           cp -rf build/octave public/debug/ 2>/dev/null || true
-          mkdir -p public/debug/raw && cp -f build/raw/*.gz public/debug/raw/ 2>/dev/null || true
+          mkdir -p public/debug/raw && cp -f build/raw/*.gz build/raw/*.csv public/debug/raw/ 2>/dev/null || true
           cp -f build/figures/*.svg public/figures/ 2>/dev/null || true
           mkdir -p public/tables && cp -f build/tables/*.csv public/tables/ 2>/dev/null || true
           cp -f build/tables/meta_*.csv.gz build/tables/reversibility_classes.csv.gz public/tables/ 2>/dev/null || true
