@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PersistTrace: mapping the cancer cells that survive targeted therapy</title>
+<meta name="description" content="PersistTrace separates the acute drug response from the persister state in EGFR-mutant lung cancer, measures what reverses after the drug is removed, and shows the evidence behind every candidate gene.">
+<meta property="og:title" content="PersistTrace">
+<meta property="og:description" content="The tumour shrinks. Some cancer cells survive. What are they becoming?">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23e879f9' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%237dd3fc'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="banner" id="banner"></div>
+
+<header class="top">
+  <a class="brand" href="#top">Persist<span>Trace</span></a>
+  <nav class="sections" aria-label="Sections">
+    <a href="#question">Question</a>
+    <a href="#universe">Cell states</a>
+    <a href="#decompose">Decomposition</a>
+    <a href="#reversibility">Reversibility</a>
+    <a href="#graph">Escape graph</a>
+    <a href="#paradox">Replication</a>
+    <a href="#passport">Passport</a>
+    <a href="#arena">Validation</a>
+    <a href="#math">Math</a>
+    <a href="#methods">Methods</a>
+  </nav>
+  <a class="repo" href="https://github.com/PRITIDIPADAS/persist-trace">Code on GitHub</a>
+</header>
+
+<main id="main">
+<div class="hero" id="top">
+  <div>
+    <h1>The tumour shrinks.<br>Some cancer cells survive.<br><em>What are they becoming?</em></h1>
+    <p class="lede">Lung cancer cells with EGFR mutations can survive osimertinib without any new mutation by switching into a <strong>drug-tolerant persister</strong> state. PersistTrace takes 60 public RNA-seq experiments, removes the part of the signal that is just acute drug stress, measures what fades after the drug is stopped, and shows <strong>how strong the evidence is</strong> for every gene it flags.</p>
+    <div class="stats" id="heroStats" aria-live="polite"></div>
+  </div>
+  <figure class="stage" aria-label="Animated map of the real samples">
+    <canvas id="heroCanvas"></canvas>
+    <div class="phase" id="heroPhase"></div>
+    <div class="controls">
+      <button class="btn small" id="heroPlay" aria-pressed="true">Pause</button>
+    </div>
+    <figcaption class="caption"><span id="heroCap">Loading real data</span><span>each dot is one sequenced sample</span></figcaption>
+  </figure>
+</div>
+
+<div class="atlas">
+  <h2>Everything in this project, one swipe</h2>
+  <div class="tiles" id="tiles"></div>
+</div>
+
+<section class="mod reveal" id="question">
+  <div class="mod-head">
+    <div>
+      <div class="n">01 / The question</div>
+      <h2>Are persisters one population, or several states on different paths?</h2>
+      <p>Most analyses compare treated cells with untreated cells. That mixes three different things: stress that every cell feels in the first day, the persister state that builds up over weeks, and recovery after the drug is gone. PersistTrace pulls those apart.</p>
+    </div>
+    <div class="plain"><b>In plain words.</b> Imagine a crowd hit by a storm. Everyone gets wet in the first hour, so "being wet" tells you nothing about who will still be standing after three weeks. We look for what changes only in the survivors, and for what goes back to normal when the storm stops.</div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3>Five conditions, four cell lines</h3><p class="sub">PC9, NCI-H1975, HCC827 and HCC2935, each sequenced untreated, after 24 h of 500 nM osimertinib, as 21-day persisters, 24 h after washout and after regrowth (3 to 10 days, set per line by the original authors). Three biological replicates each.</p></div>
+    <div class="card"><h3>What we add</h3><p class="sub">A decomposition that strips the acute response from the persister signal, a population-level reversibility map with memory half-lives, and an evidence passport that keeps markers and mechanisms apart.</p></div>
+    <div class="card"><h3>What we do not claim</h3><p class="sub">No diagnosis, no treatment advice, no proof that any gene causes resistance. Cell lines are not patients. Every label on this page is an evidence level, and the passport says which level.</p></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>Watch the data move</h3><p class="sub">Rendered by the pipeline from the real sample coordinates. The four large dots are the cell-line averages walking through the five conditions.</p><video id="trajVideo" controls muted playsinline preload="none" poster=""></video></div>
+</section>
+
+<section class="mod reveal" id="universe">
+  <div class="mod-head">
+    <div>
+      <div class="n">02 / Cell-State Universe</div>
+      <h2>Where each experiment sits</h2>
+      <p>Principal component analysis of the 2,000 most variable genes. "Centred" removes each cell line's own baseline so the treatment conditions can be compared across lines; "raw" shows how different the lines are to begin with.</p>
+    </div>
+    <div class="plain"><b>How to read it.</b> Samples that are close together have similar gene activity. Hover a dot to see its GEO sample ID.</div>
+  </div>
+  <div class="toolbar" id="uniTools"></div>
+  <div class="card"><svg class="chart" id="uniChart" viewBox="0 0 900 520" role="img" aria-label="Sample embedding"></svg><div class="legend" id="uniLegend"></div></div>
+</section>
+
+<section class="mod reveal" id="decompose">
+  <div class="mod-head">
+    <div>
+      <div class="n">03 / Persistence-specific signal decomposition</div>
+      <h2>Subtract the stress, keep the persister</h2>
+      <p>For every gene and cell line we have the acute change <i>A</i> and the persister change <i>P</i>. A robust regression across all genes finds how much of the acute response persisters still carry. What is left, <i>S</i>, is the persister-specific part.</p>
+    </div>
+    <div class="plain"><b>The idea in one line.</b> If a gene goes up on day one and is still up on day 21, that is mostly stress. If it only goes up by day 21, that is the persister talking.</div>
+  </div>
+  <div class="card eq" aria-label="P equals beta times A plus S">
+    <math display="block"><mrow><msub><mi>P</mi><mi>g</mi></msub><mo>=</mo><mi>&#x3B2;</mi><mo>&#x22C5;</mo><msub><mi>A</mi><mi>g</mi></msub><mo>+</mo><msub><mi>S</mi><mi>g</mi></msub><mspace width="2em"/><msub><mi>z</mi><mi>S</mi></msub><mo>=</mo><mfrac><msub><mi>S</mi><mi>g</mi></msub><msqrt><msubsup><mi>&#x3C3;</mi><mi>P</mi><mn>2</mn></msubsup><mo>+</mo><msup><mi>&#x3B2;</mi><mn>2</mn></msup><msubsup><mi>&#x3C3;</mi><mi>A</mi><mn>2</mn></msubsup></msqrt></mfrac></mrow></math>
+    <div class="sub">Per-line DESeq2 Wald estimates, Huber-weighted slope, then DerSimonian-Laird random effects across the four lines. Ignoring the shared-control covariance makes the error bar wider, not narrower.</div>
+  </div>
+  <div class="toolbar" id="decTools"></div>
+  <div class="grid2">
+    <div class="card"><svg class="chart" id="decChart" viewBox="0 0 640 460" role="img" aria-label="Acute versus persister fold change"></svg></div>
+    <div class="card"><h3>What the slope says</h3><div id="betaText" class="sub"></div><h3 style="margin-top:16px">Top persister-specific genes</h3><div id="decTop" class="scroller"></div></div>
+  </div>
+</section>
+
+<section class="mod reveal" id="reversibility">
+  <div class="mod-head">
+    <div>
+      <div class="n">04 / Reversibility map</div>
+      <h2>What does a cancer cell remember after the drug is gone?</h2>
+      <p>Each persister change is followed into the 24 h washout and the regrowth washout. "Memory" is the fraction of the persister change still present. Where the GEO record gives the regrowth day, we fit an exponential decay and report a half-life.</p>
+    </div>
+    <div class="plain"><b>Careful wording.</b> These are averages over millions of cells. A bulk signal drifting back to baseline fits reversal, but it could also mean the persisters were outgrown by other cells. Only lineage tracing can tell those apart.</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="toolbar"><label for="geneSearch">Gene</label><input type="search" id="geneSearch" list="geneList" placeholder="Type a gene, e.g. TACSTD2" autocomplete="off"><datalist id="geneList"></datalist><span id="geneClass"></span></div>
+      <svg class="chart" id="revChart" viewBox="0 0 640 380" role="img" aria-label="Gene trajectory across conditions"></svg>
+      <div class="legend" id="revLegend"></div>
+    </div>
+    <div class="card"><h3>How much persister programme survives washout</h3><div id="memText" class="sub"></div><svg class="chart" id="memChart" viewBox="0 0 460 300" role="img" aria-label="Memory distribution"></svg><h3>Withdrawal classes (reproducible in 3 or more lines)</h3><div id="classBars"></div></div>
+  </div>
+</section>
+
+<section class="mod reveal" id="graph">
+  <div class="mod-head">
+    <div>
+      <div class="n">05 / Molecular Escape Graph</div>
+      <h2>Every edge says where it came from</h2>
+      <p>Genes, transcription factors, gene programmes and published studies. Solid edges were measured or reported. Dashed edges were inferred from a prior network plus this data. Click a gene to open its passport.</p>
+    </div>
+    <div class="plain"><b>Why the line styles matter.</b> A computer guess and a lab experiment should never look the same on screen.</div>
+  </div>
+  <div class="toolbar" id="graphTools"></div>
+  <div class="card"><svg class="chart" id="graphSvg" viewBox="0 0 1000 620" role="img" aria-label="Evidence graph"></svg><div class="legend" id="graphLegend"></div></div>
+</section>
+
+<section class="mod reveal" id="paradox">
+  <div class="mod-head">
+    <div>
+      <div class="n">06 / The replication paradox</div>
+      <h2>Asleep, or quietly copying DNA?</h2>
+      <p>Persisters are often described as dormant. Lineage tracing in PC9 found a rare subset that keeps cycling under osimertinib, with its own antioxidant and fatty-acid programmes. Here we follow cell-cycle, DNA repair and metabolic programmes through the five conditions in each line.</p>
+    </div>
+    <div class="plain"><b>Limit.</b> Bulk RNA cannot show whether a few cells are cycling while most sleep. It shows the population average. The single-cell datasets listed in Methods are the next step.</div>
+  </div>
+  <div class="toolbar" id="progTools"></div>
+  <div class="grid2">
+    <div class="card"><svg class="chart" id="progChart" viewBox="0 0 640 380" role="img" aria-label="Programme scores over conditions"></svg><div class="legend" id="progLegend"></div></div>
+    <div class="card"><h3>Programmes most shifted beyond acute stress</h3><div id="progTable" class="scroller"></div><div id="progLit" class="sub" style="margin-top:12px"></div></div>
+  </div>
+</section>
+
+<section class="mod reveal" id="passport">
+  <div class="mod-head">
+    <div>
+      <div class="n">07 / Biological Evidence Passport</div>
+      <h2>Marker or mechanism? Six separate answers, no secret score</h2>
+      <p>Each candidate gets six dimensions that are never added together. The final label is the strongest claim the evidence allows, picked by written rules. Contradictions are listed, not hidden.</p>
+    </div>
+    <div class="plain"><b>Start with TROP2.</b> It rises in persisters. A 2025 knockout study found it was not needed for persister formation. A 2026 study reported it helps persisters survive. Both can be true in different set-ups, and the passport shows exactly that.</div>
+  </div>
+  <div class="toolbar"><button class="btn" id="trapBtn">Show the TROP2 story</button><label for="claimFilter">Filter</label><select id="claimFilter"><option value="">All labels</option></select></div>
+  <div class="passport"><div class="plist" id="plist" role="listbox" aria-label="Candidate genes"></div><div class="card" id="pcard"></div></div>
+</section>
+
+<section class="mod reveal" id="arena">
+  <div class="mod-head">
+    <div>
+      <div class="n">08 / Validation arena</div>
+      <h2>Tested on a cell line the model never saw</h2>
+      <p>Leave-one-cell-line-out: signatures, feature selection and models are built on three lines and scored on the fourth. Simple baselines run next to complex ones, and every hypothesis below was written before the comparison was run.</p>
+    </div>
+    <div class="plain"><b>Why not split by cells?</b> Replicates from one line share almost everything. Testing on them flatters the model. A whole new cell line is a fairer exam.</div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Hypotheses and verdicts</h3><div id="hyps"></div></div>
+    <div class="card"><h3>Held-out separation of persisters from acute stress</h3><svg class="chart" id="foldChart" viewBox="0 0 460 280" role="img" aria-label="AUROC per held-out line"></svg><div class="legend"><span><i style="background:var(--acute)"></i>naive treated vs control signature</span><span><i style="background:var(--dtp)"></i>persister-specific signature</span></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>Five-condition classifiers on the held-out line</h3><div id="benchTable" class="scroller"></div></div>
+</section>
+
+<section class="mod reveal" id="math">
+  <div class="mod-head">
+    <div>
+      <div class="n">09 / The mathematics of switching</div>
+      <h2>Why a reversible state is enough to cause relapse</h2>
+      <p>A two-state linear model: sensitive cells S and persisters P, with switching rates that change when the drug is on. The long-run fate is set by the largest eigenvalue of the rate matrix. This panel is theory with illustrative rates, checked against an independent Octave implementation in CI.</p>
+    </div>
+    <div class="plain"><b>Try it.</b> Drag <i>a</i> to zero and only the persisters you started with survive the drug. Raise <i>b</i> and persisters turn back into fast-growing sensitive cells sooner after washout, so the tumour regrows faster.</div>
+  </div>
+  <div class="card eq">
+    <math display="block"><mrow><mfrac><mi>d</mi><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mrow><mo>[</mo><mtable><mtr><mtd><mi>S</mi></mtd></mtr><mtr><mtd><mi>P</mi></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msub><mi>r</mi><mi>S</mi></msub><mo>&#x2212;</mo><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>a</mi></mtd><mtd><msub><mi>r</mi><mi>P</mi></msub><mo>&#x2212;</mo><mi>b</mi></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mi>S</mi></mtd></mtr><mtr><mtd><mi>P</mi></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="2em"/><msub><mi>&#x3BB;</mi><mo>max</mo></msub><mo>=</mo><mfrac><mrow><mi>&#x3C4;</mi><mo>+</mo><msqrt><msup><mi>&#x3C4;</mi><mn>2</mn></msup><mo>&#x2212;</mo><mn>4</mn><mi>&#x394;</mi></msqrt></mrow><mn>2</mn></mfrac></mrow></math>
+  </div>
+  <div class="grid2">
+    <div class="card"><svg class="chart" id="modelChart" viewBox="0 0 640 360" role="img" aria-label="Simulated population"></svg><div class="legend"><span><i style="background:var(--control)"></i>sensitive</span><span><i style="background:var(--dtp)"></i>persister</span><span><i style="background:var(--ink)"></i>total (log scale)</span></div></div>
+    <div class="card" id="modelControls"></div>
+  </div>
+</section>
+
+<section class="mod reveal" id="methods">
+  <div class="mod-head">
+    <div>
+      <div class="n">10 / Methods and reproducibility</div>
+      <h2>Rerun it yourself</h2>
+      <p>Everything on this page is generated by one command from public files whose checksums are listed below. The analysis runs again on every change in GitHub Actions, together with the tests and the Octave cross-check.</p>
+    </div>
+    <div class="plain"><code>pip install -e . &amp;&amp; python -m persisttrace.pipeline</code></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Acceptance gates</h3><div id="gates"></div><h3 style="margin-top:16px">Robustness</h3><div id="robust" class="sub"></div></div>
+    <div class="card"><h3>Source files</h3><div id="manifest" class="scroller sub"></div><h3 style="margin-top:16px">Run</h3><div id="runinfo" class="sub"></div></div>
+  </div>
+  <div class="grid3" style="margin-top:14px">
+    <div class="card"><h3>Limitations</h3><p class="sub">Four cell lines, three replicates each. Long washouts differ in length between lines. Bulk data cannot resolve subpopulations. Regulator activity is inferred from expression of targets, so it is not independent of expression. No new wet-lab experiments and no clinical validation. Literature records were curated by hand and can be incomplete.</p></div>
+    <div class="card"><h3>Next datasets</h3><p class="sub">Single-cell: GSE243562 (patient-derived xenografts, residual tumour) and the PC9 osimertinib arm of GSE275199, kept separate from its H358 sotorasib arm. Chromatin: GSE193259 ATAC-seq. These are listed as planned, not run.</p></div>
+    <div class="card"><h3>Prior work we build on</h3><div id="refs" class="sub"></div></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p class="boundary">PersistTrace is a computational research framework for EGFR-mutant non-small-cell lung cancer cell models treated with osimertinib. It separates acute drug responses from persistent molecular changes and keeps observed markers apart from candidate mechanisms. It does not diagnose patients, recommend treatment or replace laboratory validation.</p>
+  <p>Data: NCBI GEO GSE193258 (Criscione et al., npj Precision Oncology 2022). Gene sets: MSigDB hallmark. Regulons: CollecTRI. Built by PRITIDIPADAS for a science fair. <a href="https://github.com/PRITIDIPADAS/persist-trace">Source code</a>.</p>
+</footer>
+<div class="tip" id="tip" role="tooltip"></div>
+<script src="js/charts.js"></script>
+<script src="js/hero.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

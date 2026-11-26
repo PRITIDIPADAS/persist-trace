@@ -1,0 +1,38 @@
+project: PersistTrace
+primary_dataset: GSE193258
+seed: 20261126
+
+geo:
+  counts_url: "https://www.ncbi.nlm.nih.gov/geo/download/?type=rnaseq_counts&acc={acc}&format=file&file={acc}_raw_counts_GRCh38.p13_NCBI.tsv.gz"
+  annot_url: "https://www.ncbi.nlm.nih.gov/geo/download/?type=rnaseq_counts&format=file&file=Human.GRCh38.p13.annot.tsv.gz"
+  matrix_url: "https://ftp.ncbi.nlm.nih.gov/geo/series/{stub}/{acc}/matrix/{acc}_series_matrix.txt.gz"
+  suppl_url: "https://ftp.ncbi.nlm.nih.gov/geo/series/{stub}/{acc}/suppl/"
+
+design:
+  cell_lines: [PC9, H1975, HCC827, HCC2935]
+  conditions: [control, acute, dtp, wo_short, wo_long]
+  reference: control
+  expected_replicates: 3
+  timeline_days:
+    control: 0
+    acute: 1
+    dtp: 21
+    wo_short: 1
+    wo_long: null
+
+filter:
+  min_count: 10
+  min_samples: 3
+
+thresholds:
+  alpha: 0.05
+  lfc: 1.0
+  reproducible_lines: 3
+
+benchmark:
+  signature_size: 100
+  top_variable: 2000
+
+robustness:
+  alpha_grid: [0.01, 0.05, 0.1]
+  lfc_grid: [0.5, 1.0, 1.5]

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persisttrace"
+version = "1.0.0"
+description = "Reversibility-aware evidence framework for drug-tolerant persister states in EGFR-mutant lung cancer"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "PRITIDIPADAS" }]
+dependencies = ["numpy", "pandas", "scipy", "statsmodels", "scikit-learn", "pydeseq2", "matplotlib", "pyyaml"]
+
+[project.optional-dependencies]
+full = ["xgboost", "decoupler"]
+dev = ["pytest"]
+
+[project.scripts]
+persisttrace = "persisttrace.pipeline:main"
+
+[tool.setuptools]
+packages = ["persisttrace"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

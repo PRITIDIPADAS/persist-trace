@@ -1,0 +1,100 @@
+name: analysis
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: analysis
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONHASHSEED: "0"
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq octave ffmpeg > /dev/null
+          pip install -q -r requirements.txt
+          pip install -q -e .
+
+      - name: Unit tests (synthetic data)
+        run: pytest -q 2>&1 | tee test_unit.log
+
+      - name: Analyse GSE193258
+        id: pipeline
+        continue-on-error: true
+        run: python -m persisttrace.pipeline --source geo --work build --site site 2>&1 | tee pipeline.log; exit ${PIPESTATUS[0]}
+
+      - name: Octave cross-check
+        if: steps.pipeline.outcome == 'success'
+        run: |
+          octave --no-gui --quiet --eval "addpath('matlab'); run_all('build/octave')"
+          PT_OCTAVE_DIR=build/octave pytest -q tests/test_octave_crosscheck.py 2>&1 | tee test_octave.log
+
+      - name: Assemble site
+        if: always()
+        run: |
+          mkdir -p public
+          cp -r site/. public/
+          rm -f public/data/*_synthetic.json public/media/*_synthetic.*
+          mkdir -p public/debug public/figures
+          cp -f pipeline.log test_unit.log public/debug/ 2>/dev/null || true
+          cp -f test_octave.log public/debug/ 2>/dev/null || true
+          cp -rf build/manifests public/debug/ 2>/dev/null || true
+          cp -f build/results_summary.json public/debug/ 2>/dev/null || true
+          cp -rf build/octave public/debug/ 2>/dev/null || true
+          cp -f build/figures/*.svg public/figures/ 2>/dev/null || true
+          mkdir -p public/tables && cp -f build/tables/*.csv public/tables/ 2>/dev/null || true
+          cp -f build/tables/meta_*.csv.gz build/tables/reversibility_classes.csv.gz public/tables/ 2>/dev/null || true
+          echo "{\"commit\":\"${GITHUB_SHA}\",\"pipeline\":\"${{ steps.pipeline.outcome }}\",\"run\":\"${GITHUB_RUN_ID}\"}" > public/debug/status.json
+          touch public/.nojekyll
+
+      - name: Publish to gh-pages branch
+        if: always()
+        run: |
+          cd public
+          git init -q -b gh-pages
+          git config user.name "PRITIDIPADAS"
+          git config user.email "249524565+PRITIDIPADAS@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Publish analysis for ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
+      - uses: actions/configure-pages@v5
+        if: always()
+        continue-on-error: true
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        if: always()
+        continue-on-error: true
+        with:
+          path: public
+
+      - uses: actions/deploy-pages@v4
+        if: always()
+        continue-on-error: true
+
+      - name: Fail if the analysis failed
+        if: steps.pipeline.outcome != 'success'
+        run: exit 1

@@ -1,0 +1,118 @@
+# Curated literature evidence. Every record was checked against the PubMed record (and full
+# text where noted) on 2026-11-26. Summaries are paraphrased. "outcome" says what was measured,
+# because knocking a gene down and changing DTP formation is not the same as changing later resistance.
+
+sources:
+  criscione2022:
+    title: The landscape of therapeutic vulnerabilities in EGFR inhibitor osimertinib drug tolerant persister cells
+    journal: NPJ Precision Oncology
+    year: 2022
+    pmid: "36575215"
+    doi: 10.1038/s41698-022-00337-w
+    note: Source study for GSE193258 and GSE193259. Full text checked.
+  baldacci2025:
+    title: Eradicating drug-tolerant persister cells in EGFR-mutated non-small cell lung cancer by targeting TROP2 with CAR-T cellular therapy
+    journal: Cancer Discovery
+    year: 2025
+    pmid: "40762432"
+    doi: 10.1158/2159-8290.CD-24-1515
+    note: Full text checked for the TACSTD2 knockout result.
+  liao2026:
+    title: Targeting TROP2 in drug-tolerant persister cells delays EGFR tyrosine kinase inhibitor resistance in non-small-cell lung cancer
+    journal: Cancer Cell
+    year: 2026
+    pmid: "42314664"
+    doi: 10.1016/j.ccell.2026.05.020
+    note: Abstract checked. Perturbation method not stated in the abstract.
+  chang2026:
+    title: A four-gene signature identifies TKI-induced persister cells and uncovers a ZLN005-induced pyroptotic vulnerability via the GSDME pathway in EGFR-mutant lung cancer
+    journal: Molecular Medicine Reports
+    year: 2026
+    pmid: "42757482"
+    doi: 10.3892/mmr.2026.14017
+    note: Abstract checked. Closest prior art for the machine-learning signature idea.
+  kashima2021:
+    title: Single-cell analyses reveal diverse mechanisms of resistance to EGFR tyrosine kinase inhibitors in lung cancer
+    journal: Cancer Research
+    year: 2021
+    pmid: "34247147"
+    doi: 10.1158/0008-5472.CAN-20-2811
+  isozaki2023:
+    title: Therapy-induced APOBEC3A drives evolution of persistent cancer cells
+    journal: Nature
+    year: 2023
+    pmid: "37407818"
+    doi: 10.1038/s41586-023-06303-1
+  oren2021:
+    title: Cycling cancer persister cells arise from lineages with distinct programs
+    journal: Nature
+    year: 2021
+    pmid: "34381210"
+    doi: 10.1038/s41586-021-03796-6
+  lu2026:
+    title: Aumolertinib combined with targeting ETV4 in the treatment of non-small cell lung cancer
+    journal: Journal of Thoracic Disease
+    year: 2026
+    pmid: "41816486"
+    doi: 10.21037/jtd-2025-aw-2071
+  gini2025:
+    title: CDK4 or CDK6 upregulation induces DNA replication stress and genomic instability to cause EGFR targeted therapy resistance in lung cancer
+    journal: bioRxiv (preprint)
+    year: 2025
+    pmid: "41256559"
+    doi: 10.1101/2024.03.12.584638
+
+records:
+  - gene: TACSTD2
+    alias: TROP2
+    source: baldacci2025
+    kind: genetic_perturbation
+    perturbation: CRISPR/Cas9 knockout, two PC9 clones, plus lentiviral re-expression
+    model: PC9 in vitro, osimertinib
+    outcome: DTP formation
+    effect: none
+    summary: Knockout changed neither growth, osimertinib sensitivity nor DTP formation; re-expression also had no effect. The authors read the TROP2 rise in persisters as a passenger event.
+  - gene: TACSTD2
+    alias: TROP2
+    source: baldacci2025
+    kind: observational
+    model: neoadjuvant patient samples, cell lines and PDX treated with osimertinib
+    outcome: expression in residual or persister cells
+    effect: increased
+    summary: TROP2 expression was enriched in residual disease and persister models.
+  - gene: TACSTD2
+    alias: TROP2
+    source: liao2026
+    kind: functional_and_pharmacological
+    perturbation: functional assays (method not given in abstract) and TROP2 ADC plus osimertinib
+    model: EGFR-mutant NSCLC preclinical models
+    outcome: DTP maintenance and DTP emergence under combination
+    effect: required
+    summary: TROP2 rises during TKI-induced DTP formation and is reported to contribute to DTP maintenance; MAPK inhibition lowers c-Myc, which normally represses TROP2. The ADC combination suppressed DTP emergence.
+  - gene: MYC
+    target: TACSTD2
+    source: liao2026
+    kind: regulatory
+    model: EGFR-mutant NSCLC preclinical models
+    outcome: transcriptional repression of TACSTD2
+    effect: represses
+    summary: c-Myc acts as a transcriptional repressor of TROP2.
+  - {gene: BTG1, source: chang2026, kind: genetic_perturbation, perturbation: doxycycline-inducible shRNA knockdown, model: PC-9 and HCC827 in vitro, outcome: DTP formation, effect: required, summary: Each of the four signature genes was induced quickly by osimertinib and its depletion markedly impaired DTP formation.}
+  - {gene: ING4, source: chang2026, kind: genetic_perturbation, perturbation: doxycycline-inducible shRNA knockdown, model: PC-9 and HCC827 in vitro, outcome: DTP formation, effect: required, summary: Depletion markedly impaired DTP formation.}
+  - {gene: PNRC1, source: chang2026, kind: genetic_perturbation, perturbation: doxycycline-inducible shRNA knockdown, model: PC-9 and HCC827 in vitro, outcome: DTP formation, effect: required, summary: Depletion markedly impaired DTP formation.}
+  - {gene: CALCOCO1, source: chang2026, kind: genetic_perturbation, perturbation: doxycycline-inducible shRNA knockdown, model: PC-9 and HCC827 in vitro, outcome: DTP formation, effect: required, summary: Depletion markedly impaired DTP formation.}
+  - {gene: AURKB, source: criscione2022, kind: genetic_perturbation, perturbation: siRNA knockdown or CRISPR knockout, model: osimertinib DTP cell lines, outcome: DTP vulnerability to drug combination, effect: required, summary: Genetic validation that AURKB is the target behind the AURKB-inhibitor vulnerability of DTPs.}
+  - {gene: BRD4, source: criscione2022, kind: genetic_perturbation, perturbation: siRNA knockdown or CRISPR knockout, model: osimertinib DTP cell lines, outcome: DTP vulnerability to drug combination, effect: required, summary: Genetic validation that BRD4 is the target behind the BRD4-inhibitor vulnerability of DTPs.}
+  - {gene: TEAD1, family: TEAD, source: criscione2022, kind: genetic_perturbation, perturbation: siRNA knockdown or CRISPR knockout (family level), model: osimertinib DTP cell lines, outcome: DTP vulnerability to drug combination, effect: required, summary: TEAD validated as a target behind the TEAD-inhibitor vulnerability; the abstract names the family, not a single paralog.}
+  - {gene: TEAD1, family: TEAD, source: criscione2022, kind: chromatin, model: four EGFR-mutant lines, outcome: motif enrichment in regions gaining accessibility in DTPs, effect: increased, summary: TEAD motifs were enriched in regions that gained accessibility in all four cell lines, consistent with the Hippo pathway switching off.}
+  - {gene: CD74, source: kashima2021, kind: genetic_perturbation, perturbation: in vitro and in vivo gain and loss experiments, model: EGFR-mutant NSCLC models, outcome: osimertinib resistance and apoptosis, effect: required, summary: CD74 upregulation conferred osimertinib resistance and blocked apoptosis; described as important in the drug-tolerant state.}
+  - {gene: APOBEC3A, source: isozaki2023, kind: genetic_perturbation, perturbation: deletion, model: lung cancer targeted-therapy persister models, outcome: mutagenesis in persisters and time to resistance, effect: required, summary: Deletion reduced APOBEC mutations and structural variants in persisters and delayed resistance. This is about evolution toward resistance, not DTP formation.}
+  - {gene: ETV4, source: lu2026, kind: genetic_perturbation, perturbation: siRNA knockdown, model: PC-9 with aumolertinib, outcome: apoptosis and G2/M arrest under acute treatment, effect: sensitizes, summary: Knockdown enhanced aumolertinib-induced apoptosis. Different TKI and an acute endpoint, so it says little about DTP formation.}
+  - {gene: CDK4, source: gini2025, kind: genetic_perturbation, perturbation: overexpression, model: EGFR-mutant LUAD models, outcome: proliferative arrest, replication stress and resistance, effect: promotes, summary: Overexpression limited TKI-induced arrest and raised replication stress. Preprint.}
+  - {gene: CDK6, source: gini2025, kind: genetic_perturbation, perturbation: overexpression, model: EGFR-mutant LUAD models, outcome: proliferative arrest, replication stress and resistance, effect: promotes, summary: Overexpression limited TKI-induced arrest and raised replication stress. Preprint.}
+
+programs:
+  - {program: HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION, source: criscione2022, summary: A cluster of genes up in DTPs but not after acute treatment stayed up through washout and was enriched for EMT and wound-healing terms.}
+  - {program: HALLMARK_E2F_TARGETS, source: criscione2022, summary: A cluster that fell after acute treatment and recovered through washout tracked regrowth and was enriched for cell cycle and DNA replication genes.}
+  - {program: HALLMARK_FATTY_ACID_METABOLISM, source: oren2021, summary: In PC9 lineage tracing, fatty acid oxidation was associated with persisters that keep cycling under drug.}
+  - {program: HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY, source: oren2021, summary: Antioxidant programs were associated with persister proliferative capacity.}
