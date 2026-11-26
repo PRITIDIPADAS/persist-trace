@@ -18,13 +18,15 @@ All records below were checked against PubMed on 2026-11-26. DOIs are in `eviden
 
 **Tier A, analysed.** GSE193258, bulk RNA-seq, 60 samples. Counts from NCBI uniform processing (GRCh38.p13). Sample labels parsed from the series matrix and validated against the 4 x 5 x 3 design; the run stops if they do not match.
 
-**Tier B, planned, not run.**
-* GSE193259: the multi-omic SuperSeries (ATAC-seq, ChIP-seq). Assay counts are not independent biological samples.
-* GSE243562: single-cell data from patient-derived xenografts, untreated and residual tumour.
-* GSE275199: PC9 osimertinib arm only. The H358 sotorasib arm is a different drug and cancer and must not be pooled.
-* GSE302284: six samples with mixed tissue and model contexts. Limited clinical context, not a validation cohort.
+**Tier B, analysed as external validation (signatures frozen from Tier A first).**
+* GSE335846: PC9 sorted into G1, S and G2 at day 0 and after 28 days of 500 nM osimertinib (May, Martin and Houseley, Babraham Institute; public 22 June 2026; 9 samples). Checked on the GEO page on 2026-11-26.
+* GSE275199: one pooled 10x run of PC9 (untreated, 4 and 11 days of 150 nM osimertinib) and NCI-H358 (sotorasib). 8,748 barcodes. Hashtag counts were not deposited, so the cell line is inferred by clustering and drug exposure by MAPK output. The H358 sotorasib arm is never pooled with PC9.
+* GSE243562: 10x data from two EGFR-mutant PDXs (YU-003, YU-006), untreated and residual after 6 weeks of osimertinib. Mouse cells removed by the human UMI fraction.
 
-**Tier C, to be checked.** The roadmap named GSE335846 and GSE335847 (cell-cycle sorted RNA-seq and TrAEL-seq under prolonged osimertinib). These accessions and their linked paper could not be verified during this build because GEO pages were not reachable from the build environment and PubMed returned no matching paper. They stay out of every claim until checked by hand.
+**Tier C, not yet analysed.**
+* GSE335847: TrAEL-seq replication-fork data paired with GSE335846.
+* GSE193259: the multi-omic SuperSeries (ATAC-seq, ChIP-seq). Assay counts are not independent biological samples.
+* GSE302284: six samples with mixed tissue and model contexts. Limited clinical context, not a validation cohort.
 
 ## Inclusion and exclusion
 

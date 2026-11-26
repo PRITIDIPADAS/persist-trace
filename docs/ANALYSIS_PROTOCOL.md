@@ -39,4 +39,6 @@ A result is called reproducible only if it holds in at least 3 of 4 lines. Verdi
 
 * After the first real run (commit 4d653f2), H2 passed its preregistered rule with only 4 genes reversing reproducibly. A note reporting the per-line counts was added. The verdict rule itself was not changed.
 * Gate E now reports the robustness labels instead of "passed", because the first run showed high sensitivity and "passed" would hide that.
+* H7 (PDX residual tumours) and H8 (equal marking across G1, S and G2 in GSE335846) were added after the first run, once those datasets were processed. The signatures they test were frozen from GSE193258 before either dataset was read. H5 was declared untestable before the run; single-cell data later made it testable, and its rule (cycling share between 5% and 95%, or a two-component fit better by more than 10 BIC) was written before the single-cell results were seen.
+* The CollecTRI download from Zenodo failed with HTTP 503 in one build, which silently emptied the regulator analysis. The regulons are now pinned in `evidence/` and logged.
 * MSigDB set names from decoupler lacked the HALLMARK_ prefix, so the focus list of programmes did not match. The names were normalised; no statistic changed.
