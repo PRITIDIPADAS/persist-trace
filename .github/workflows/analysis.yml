@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: analysis
@@ -79,22 +77,6 @@ jobs:
           git add -A
           git commit -q -m "Publish analysis for ${GITHUB_SHA::7}"
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
-
-      - uses: actions/configure-pages@v5
-        if: always()
-        continue-on-error: true
-        with:
-          enablement: true
-
-      - uses: actions/upload-pages-artifact@v3
-        if: always()
-        continue-on-error: true
-        with:
-          path: public
-
-      - uses: actions/deploy-pages@v4
-        if: always()
-        continue-on-error: true
 
       - name: Fail if the analysis failed
         if: steps.pipeline.outcome != 'success'

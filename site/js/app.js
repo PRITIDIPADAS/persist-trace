@@ -310,7 +310,8 @@
     const pref = ["HALLMARK_E2F_TARGETS", "HALLMARK_G2M_CHECKPOINT", "HALLMARK_DNA_REPAIR", "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION", "HALLMARK_FATTY_ACID_METABOLISM", "HALLMARK_REACTIVE_OXYGEN_SPECIES_PATHWAY"];
     const choices = pref.filter(p => progs.includes(p)).concat(progs.filter(p => !pref.includes(p))).slice(0, 9);
     let cur = choices[0];
-    const nice = p => p.replace("HALLMARK_", "").replace(/_/g, " ").toLowerCase().replace(/^\w/, c => c.toUpperCase());
+    const ACR = { dna: "DNA", e2f: "E2F", g2m: "G2/M", tnfa: "TNFα", nfkb: "NF-κB", myc: "MYC", uv: "UV", mtorc1: "mTORC1", p53: "p53", tgf: "TGF", il6: "IL-6", jak: "JAK", stat3: "STAT3", kras: "KRAS", pi3k: "PI3K", akt: "AKT", mtor: "mTOR", v1: "v1", v2: "v2", dn: "down", up: "up" };
+    const nice = p => { const w = p.replace("HALLMARK_", "").toLowerCase().split("_").map(x => ACR[x] || x); const t = w.join(" "); return t.charAt(0).toUpperCase() + t.slice(1); };
     group($("progTools"), choices.map(p => [p, nice(p)]), cur, p => { cur = p; draw(); });
     $("progLegend").innerHTML = lines.map(l => `<span><i style="background:${LINE_COLORS[l]}"></i>${l}</span>`).join("");
     function draw() {
@@ -337,9 +338,9 @@
     };
     const e2f = rec("E2F_TARGETS"), g2m = rec("G2M_CHECKPOINT");
     const tf = (R.tf_activity || []).find(t => t.source === "E2F1");
-    if (e2f !== null) $("progLit").insertAdjacentHTML("beforebegin", `<p class="sub" style="margin-top:12px"><b>The paradox in numbers.</b> Proliferation programmes collapse after 24 h of drug. In 21-day persisters, E2F targets are on average <b>${Math.round(e2f * 100)}%</b> of the way back to the untreated level${g2m !== null ? ` and G2/M genes <b>${Math.round(g2m * 100)}%</b>` : ""}, while the drug is still on.${tf ? ` Inferred E2F1 activity is higher in persisters than acute stress predicts (score ${fmt(tf.score)}, FDR ${fmt(tf.fdr)}).` : ""} A bulk average cannot say whether all cells restarted slowly or a few restarted fully.</p>`);
+    if (e2f !== null) $("progLit").insertAdjacentHTML("beforebegin", `<p class="sub" style="margin-top:12px"><b>The paradox in numbers.</b> Proliferation programmes collapse after 24 h of drug. In 21-day persisters, E2F targets are on average <b>${Math.round(e2f * 100)}%</b> of the way back to the untreated level${g2m !== null ? ` and G2/M genes <b>${Math.round(g2m * 100)}%</b>` : ""}, while the drug is still on.${tf ? ` Inferred E2F1 activity is higher in persisters than acute stress predicts (score ${fmt(tf.score)}, FDR ${tf.fdr === 0 ? "below 0.0001" : fmt(tf.fdr)}).` : ""} A bulk average cannot say whether all cells restarted slowly or a few restarted fully.</p>`);
     const rows = R.programs.persister_specific || [];
-    $("progTable").innerHTML = `<table class="t"><thead><tr><th>Programme</th><th>score</th><th>FDR</th></tr></thead><tbody>${rows.slice(0, 14).map(r => `<tr><td>${nice(r.source)}</td><td class="num">${fmt(r.score)}</td><td class="num">${fmt(r.fdr)}</td></tr>`).join("")}</tbody></table><p class="sub">Score: t-statistic of a linear model of persister-specific z on programme membership. Positive means the programme rises in persisters beyond acute stress.</p>`;
+    $("progTable").innerHTML = `<table class="t"><thead><tr><th>Programme</th><th>score</th><th>FDR</th></tr></thead><tbody>${rows.slice(0, 14).map(r => `<tr><td>${nice(r.source)}</td><td class="num">${fmt(r.score)}</td><td class="num">${r.fdr === 0 ? "&lt;1e-4" : fmt(r.fdr)}</td></tr>`).join("")}</tbody></table><p class="sub">Score: t-statistic of a linear model of persister-specific z on programme membership. Positive means the programme rises in persisters beyond acute stress.</p>`;
     draw();
   }
 
