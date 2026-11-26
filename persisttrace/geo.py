@@ -3,6 +3,7 @@ import datetime as dt
 import gzip
 import hashlib
 import io
+import os
 import re
 import time
 import urllib.request
@@ -27,6 +28,8 @@ def sha256(path):
 
 def download(url, dest, tries=4):
     dest = Path(dest)
+    if os.environ.get("PT_OFFLINE") and dest.exists():
+        return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
     last = None
     for attempt in range(tries):

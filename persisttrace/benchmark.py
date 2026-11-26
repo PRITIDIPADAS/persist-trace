@@ -68,6 +68,7 @@ def run(logcpm, samples, per_line, cfg):
     for held in lines:
         train = [l for l in lines if l != held]
         mS, mP = _meta(per_line, train)
+        mS, mP = mS.loc[mS.index.intersection(genes)], mP.loc[mP.index.intersection(genes)]
         sigs = {"naive_treated_vs_control": decompose.signature(mP, n),
                 "persister_specific": decompose.signature(mS, n, anchor=mP)}
         test = samples[samples.cell_line == held]
