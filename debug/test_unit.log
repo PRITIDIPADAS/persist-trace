@@ -1,0 +1,41 @@
+...............ss......................                                  [100%]
+=============================== warnings summary ===============================
+tests/test_external.py::test_external_modules_run_on_fake_files
+  /home/runner/work/persist-trace/persist-trace/persisttrace/external.py:78: DeprecationWarning: The default value for `spmatrix` is changing to `False` in v1.20.
+               That means the default return type will be a sparse array.
+               Unless you use * instead of @, ** for matrix power, or you depend
+               on 2D shapes from e.g. `A.sum(axis=0)` it may not matter to you.
+               See the spmatrix to sparray migration guide for details.
+               https://docs.scipy.org/doc/scipy/reference/sparse.migration_to_sparray.html
+               
+    return sparse.csr_matrix(sio.mmread(f))
+
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+  /opt/hostedtoolcache/Python/3.13.18/x64/lib/python3.13/functools.py:934: UserWarning: zero-centering a sparse array/matrix densifies it.
+    return dispatch(args[0].__class__)(*args, **kw)
+
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+  /home/runner/work/persist-trace/persist-trace/persisttrace/external.py:112: FutureWarning: The argument key_added is deprecated and will be removed in the future. Use `out` instead.
+    sc.tl.leiden(a, resolution=res, random_state=seed, key_added=f"leiden_{res}", flavor="igraph", n_iterations=2)
+
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+tests/test_external.py::test_external_modules_run_on_fake_files
+  /home/runner/work/persist-trace/persist-trace/persisttrace/external.py:222: DeprecationWarning: The default value for `spmatrix` is changing to `False` in v1.20.
+               That means the default return type will be a sparse array.
+               Unless you use * instead of @, ** for matrix power, or you depend
+               on 2D shapes from e.g. `A.sum(axis=0)` it may not matter to you.
+               See the spmatrix to sparray migration guide for details.
+               https://docs.scipy.org/doc/scipy/reference/sparse.migration_to_sparray.html
+               
+    mats[gsm] = sparse.csr_matrix(sio.mmread(io.BytesIO(gzip.decompress(data))))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+37 passed, 2 skipped, 13 warnings in 91.92s (0:01:31)

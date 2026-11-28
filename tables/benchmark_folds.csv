@@ -1,0 +1,5 @@
+held_out,naive_treated_vs_control|auroc_dtp_vs_acute,naive_treated_vs_control|auroc_dtp_vs_control,naive_treated_vs_control|auroc_dtp_vs_wo_long,naive_treated_vs_control|replicated_fraction,naive_treated_vs_control|spearman_genomewide,persister_specific|auroc_dtp_vs_acute,persister_specific|auroc_dtp_vs_control,persister_specific|auroc_dtp_vs_wo_long,persister_specific|replicated_fraction,persister_specific|spearman_genomewide
+H1975,0.6666666666666666,1.0,0.6666666666666666,0.89,0.6064905743929079,1.0,1.0,0.6666666666666666,0.42,0.27574809275693407
+HCC2935,0.6666666666666666,1.0,1.0,0.91,0.5726937426767937,1.0,1.0,0.888888888888889,0.71,0.38906098132419253
+HCC827,0.11111111111111112,1.0,0.5555555555555556,0.85,0.6082075626189517,1.0,1.0,0.7777777777777779,0.52,0.3997051450077543
+PC9,1.0,1.0,1.0,0.9,0.5972088837361519,1.0,1.0,0.7777777777777778,0.58,0.3601838711347665

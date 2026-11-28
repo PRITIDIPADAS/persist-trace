@@ -1,0 +1,4 @@
+accession,role,url,path,bytes,sha256,retrieved_utc
+GSE193258,series_matrix,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE193nnn/GSE193258/matrix/GSE193258_series_matrix.txt.gz,build/raw/GSE193258_series_matrix.txt.gz,4939,e8b9c6ac17b54027cf5167d05e5464f28ab4891271b3ec3c660661aec943030e,2026-11-28T08:45:19+00:00
+GSE193258,ncbi_raw_counts,https://www.ncbi.nlm.nih.gov/geo/download/?type=rnaseq_counts&acc=GSE193258&format=file&file=GSE193258_raw_counts_GRCh38.p13_NCBI.tsv.gz,build/raw/GSE193258_raw_counts_GRCh38.p13_NCBI.tsv.gz,2509354,e34381bc447e5c3c960bc36353f0149bd002bd3eca8cd72129ced7e121dbe244,2026-11-28T08:45:19+00:00
+NCBI Gene,gene_symbols,https://ftp.ncbi.nlm.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz,build/raw/Homo_sapiens.gene_info.gz,5177385,404d6631da530a97d5b8c601953a78bc0b97af1249d51f606a9d1875e33c55fc,2026-11-28T08:45:20+00:00

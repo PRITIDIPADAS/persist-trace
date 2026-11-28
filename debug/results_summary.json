@@ -1,0 +1,624 @@
+{
+ "meta": {
+  "project": "PersistTrace",
+  "version": "1.0.0",
+  "source": "geo",
+  "synthetic": false,
+  "dataset": "GSE193258",
+  "generated_utc": "2026-11-28T08:45:19+00:00",
+  "python": "3.13.18",
+  "n_samples": 60,
+  "n_genes_tested": 16172,
+  "cell_lines": [
+   "H1975",
+   "HCC2935",
+   "HCC827",
+   "PC9"
+  ],
+  "conditions": {
+   "control": "DMSO control",
+   "acute": "Acute osimertinib (24 h)",
+   "dtp": "Persister (21 d)",
+   "wo_short": "Short washout (24 h)",
+   "wo_long": "Long washout (regrowth)"
+  },
+  "pca_variance": [
+   0.342,
+   0.204,
+   0.121
+  ],
+  "pca_raw_variance": [
+   0.381,
+   0.229,
+   0.167
+  ],
+  "networks": {
+   "hallmark": "decoupler/omnipath MSigDB hallmark",
+   "collectri": "CollecTRI, Zenodo 8192729 (pinned copy in evidence/)"
+  },
+  "counts_source": "NCBI GEO uniform counts (GRCh38.p13)",
+  "counts_file": "GSE193258_raw_counts_GRCh38.p13_NCBI.tsv.gz"
+ },
+ "betas": {
+  "H1975": 0.735,
+  "HCC2935": 0.69,
+  "HCC827": 0.716,
+  "PC9": 0.915
+ },
+ "hypotheses": [
+  {
+   "id": "H1",
+   "text": "Removing the acute stress component makes persister signatures separate persisters from acute treatment better in an unseen cell line.",
+   "metric": "mean held-out AUROC, DTP vs acute",
+   "naive": 0.61111,
+   "decomposed": 1.0,
+   "result": "supported"
+  },
+  {
+   "id": "H1b",
+   "text": "Persister-specific signature genes replicate in the held-out cell line at least as often as naive treated-vs-control genes.",
+   "metric": "fraction of signature genes significant with the same sign in the held-out line",
+   "naive": 0.8875,
+   "decomposed": 0.5575,
+   "result": "contradicted"
+  },
+  {
+   "id": "H2",
+   "text": "Persister programmes differ in how they behave after drug withdrawal.",
+   "metric": "reproducible genes per withdrawal class",
+   "classes": {
+    "not_changed": 13015,
+    "dtp_persists_after_regrowth": 1429,
+    "acute_only": 196,
+    "dtp_reversed_by_24h": 4
+   },
+   "result": "supported",
+   "note": "Post hoc: only 4 genes reverse reproducibly in 3 or more lines; reversal is mostly line-specific. H1975: 139 reversing genes, HCC2935: 618 reversing genes, HCC827: 154 reversing genes, PC9: 1392 reversing genes"
+  },
+  {
+   "id": "H3",
+   "text": "Regulatory inference adds information beyond expression alone.",
+   "metric": "TFs with significant persister-specific activity (FDR < 0.05)",
+   "value": 11,
+   "result": "partially supported",
+   "note": "Activity is inferred from target expression, so this is supporting, not independent, evidence."
+  },
+  {
+   "id": "H4",
+   "text": "Some strong persister markers lack evidence that they are needed for persister formation.",
+   "metric": "passports labelled marker-without-support or contested",
+   "genes": [
+    "TACSTD2"
+   ],
+   "result": "supported"
+  },
+  {
+   "id": "H5",
+   "text": "Different persister subpopulations coexist.",
+   "metric": "PC9 single cells under osimertinib (GSE275199): cycling fraction and bimodality of the persister score",
+   "value": null,
+   "result": "supported",
+   "note": "2864 drug-exposed PC9 cells; 23% in a cycling state; delta BIC for two vs one component 21. Drug exposure inferred from MAPK output (hashtags not public)."
+  },
+  {
+   "id": "H7",
+   "text": "The persister-specific signature, frozen from cell lines, marks residual tumour cells in patient-derived xenografts after six weeks of osimertinib.",
+   "metric": "mean AUROC, residual vs untreated tumour cells, two PDXs (GSE243562)",
+   "naive": 0.7074,
+   "decomposed": 0.69623,
+   "result": "supported",
+   "note": "Post hoc, added after the first run; signatures frozen before these data were read. Both transfer in vivo (naive 0.71, stress-removed 0.70), so removing stress gives no extra edge here."
+  },
+  {
+   "id": "H8",
+   "text": "The stress-removed signature marks persisters equally in G1, S and G2, so cycling persisters carry it too.",
+   "metric": "smallest / largest day-28 shift across sorted phases (GSE335846); 1 means identical",
+   "naive": 0.2949,
+   "decomposed": 0.85863,
+   "result": "supported",
+   "note": "Post hoc, added after the first run. Shifts per phase: naive G1 +2.32, naive G2 +0.98, naive S +0.69, persister G1 +2.04, persister G2 +1.93, persister S +1.75"
+  },
+  {
+   "id": "H6",
+   "text": "Evidence-aware ranking places literature-supported genes higher than expression-only ranking.",
+   "metric": "rank percentile (lower is better) of genes with published perturbation records",
+   "ranks": [
+    {
+     "gene": "TACSTD2",
+     "naive_percentile": 0.69385,
+     "persister_specific_percentile": 0.84195
+    },
+    {
+     "gene": "MYC",
+     "naive_percentile": 0.96908,
+     "persister_specific_percentile": 0.26472
+    },
+    {
+     "gene": "BTG1",
+     "naive_percentile": 0.22366,
+     "persister_specific_percentile": 0.97731
+    },
+    {
+     "gene": "ING4",
+     "naive_percentile": 0.11347,
+     "persister_specific_percentile": 0.42104
+    },
+    {
+     "gene": "PNRC1",
+     "naive_percentile": 0.18761,
+     "persister_specific_percentile": 0.99264
+    },
+    {
+     "gene": "CALCOCO1",
+     "naive_percentile": 0.1152,
+     "persister_specific_percentile": 0.35221
+    },
+    {
+     "gene": "AURKB",
+     "naive_percentile": 0.04038,
+     "persister_specific_percentile": 0.68359
+    },
+    {
+     "gene": "BRD4",
+     "naive_percentile": 0.69348,
+     "persister_specific_percentile": 0.58144
+    },
+    {
+     "gene": "TEAD1",
+     "naive_percentile": 0.37744,
+     "persister_specific_percentile": 0.11044
+    },
+    {
+     "gene": "CD74",
+     "naive_percentile": 0.86854,
+     "persister_specific_percentile": 0.75402
+    },
+    {
+     "gene": "APOBEC3A",
+     "naive_percentile": 0.86143,
+     "persister_specific_percentile": 0.02535
+    },
+    {
+     "gene": "ETV4",
+     "naive_percentile": 0.11569,
+     "persister_specific_percentile": 0.79353
+    },
+    {
+     "gene": "CDK4",
+     "naive_percentile": 0.37806,
+     "persister_specific_percentile": 0.84238
+    },
+    {
+     "gene": "CDK6",
+     "naive_percentile": 0.26453,
+     "persister_specific_percentile": 0.08249
+    }
+   ],
+   "result": "exploratory",
+   "note": "Tiny, literature-biased reference set. Not a validation."
+  }
+ ],
+ "gates": {
+  "A_data_integrity": "passed",
+  "B_analytical_correctness": "passed",
+  "C_scientific_interpretation": "passed",
+  "D_ml_validity": "passed",
+  "E_robustness": "evaluated: classes highly sensitive, signature highly sensitive",
+  "F_software_reproducibility": "evaluated in CI (see tests)",
+  "G_presentation": "evaluated by review, not by code",
+  "H_release_integrity": "passed"
+ },
+ "reversibility": {
+  "distribution": {
+   "not_changed": 13015,
+   "dtp_persists_after_regrowth": 1429,
+   "acute_only": 196,
+   "dtp_reversed_by_24h": 4
+  },
+  "status_counts": {
+   "reproducible": 14644,
+   "context_dependent": 5406,
+   "single_line": 2828
+  },
+  "per_line": {
+   "H1975": {
+    "not_changed": 14246,
+    "dtp_persists_after_regrowth": 4077,
+    "acute_only": 1811,
+    "dtp_reversed_by_24h": 132,
+    "dtp_unresolved": 95,
+    "dtp_persists_24h_reversed_late": 7
+   },
+   "HCC2935": {
+    "not_changed": 12984,
+    "dtp_persists_after_regrowth": 3467,
+    "acute_only": 1607,
+    "dtp_reversed_by_24h": 370,
+    "dtp_persists_24h_reversed_late": 248,
+    "dtp_unresolved": 165,
+    "dtp_overshoot": 1
+   },
+   "HCC827": {
+    "not_changed": 13693,
+    "dtp_persists_after_regrowth": 3305,
+    "acute_only": 1266,
+    "dtp_unresolved": 183,
+    "dtp_reversed_by_24h": 154
+   },
+   "PC9": {
+    "not_changed": 11353,
+    "dtp_persists_after_regrowth": 4616,
+    "acute_only": 1678,
+    "dtp_persists_24h_reversed_late": 891,
+    "dtp_reversed_by_24h": 501,
+    "dtp_unresolved": 380
+   }
+  }
+ },
+ "memory": {
+  "summary": [
+   {
+    "cell_line": "H1975",
+    "timepoint": "wo_short",
+    "n_genes": 4311,
+    "median_memory": 0.8501,
+    "q25": 0.69666,
+    "q75": 0.98655,
+    "hist": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     2,
+     2,
+     8,
+     12,
+     36,
+     69,
+     189,
+     320,
+     460,
+     633,
+     827,
+     788,
+     488,
+     229,
+     103,
+     59,
+     37,
+     19,
+     10,
+     8,
+     7,
+     5
+    ]
+   },
+   {
+    "cell_line": "H1975",
+    "timepoint": "wo_long",
+    "n_genes": 4311,
+    "median_memory": 1.01266,
+    "q25": 0.90639,
+    "q75": 1.11602,
+    "hist": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     2,
+     1,
+     5,
+     10,
+     16,
+     34,
+     62,
+     137,
+     266,
+     509,
+     962,
+     1088,
+     721,
+     286,
+     106,
+     44,
+     29,
+     19,
+     8,
+     2,
+     4
+    ]
+   },
+   {
+    "cell_line": "HCC2935",
+    "timepoint": "wo_short",
+    "n_genes": 4251,
+    "median_memory": 0.88014,
+    "q25": 0.69614,
+    "q75": 1.02768,
+    "hist": [
+     0,
+     1,
+     0,
+     0,
+     1,
+     2,
+     1,
+     1,
+     6,
+     12,
+     12,
+     38,
+     59,
+     118,
+     173,
+     244,
+     403,
+     535,
+     678,
+     750,
+     540,
+     318,
+     193,
+     81,
+     33,
+     21,
+     11,
+     9,
+     3,
+     8
+    ]
+   },
+   {
+    "cell_line": "HCC2935",
+    "timepoint": "wo_long",
+    "n_genes": 4251,
+    "median_memory": 0.81049,
+    "q25": 0.58022,
+    "q75": 1.00128,
+    "hist": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     4,
+     1,
+     5,
+     13,
+     29,
+     49,
+     87,
+     137,
+     184,
+     260,
+     361,
+     443,
+     503,
+     558,
+     543,
+     420,
+     266,
+     157,
+     97,
+     47,
+     38,
+     14,
+     14,
+     9,
+     10
+    ]
+   },
+   {
+    "cell_line": "HCC827",
+    "timepoint": "wo_short",
+    "n_genes": 3642,
+    "median_memory": 0.96244,
+    "q25": 0.8684,
+    "q75": 1.03995,
+    "hist": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     3,
+     4,
+     11,
+     14,
+     32,
+     55,
+     113,
+     288,
+     657,
+     1103,
+     897,
+     279,
+     112,
+     40,
+     16,
+     6,
+     6,
+     3,
+     1,
+     1
+    ]
+   },
+   {
+    "cell_line": "HCC827",
+    "timepoint": "wo_long",
+    "n_genes": 3642,
+    "median_memory": 0.95405,
+    "q25": 0.84571,
+    "q75": 1.03825,
+    "hist": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     1,
+     3,
+     5,
+     8,
+     19,
+     28,
+     32,
+     84,
+     189,
+     323,
+     642,
+     1021,
+     781,
+     308,
+     118,
+     46,
+     17,
+     10,
+     3,
+     1,
+     1,
+     1
+    ]
+   },
+   {
+    "cell_line": "PC9",
+    "timepoint": "wo_short",
+    "n_genes": 6388,
+    "median_memory": 0.79451,
+    "q25": 0.68288,
+    "q75": 0.91008,
+    "hist": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     2,
+     2,
+     0,
+     7,
+     7,
+     17,
+     24,
+     42,
+     104,
+     212,
+     447,
+     935,
+     1482,
+     1384,
+     883,
+     421,
+     209,
+     101,
+     55,
+     23,
+     16,
+     7,
+     2,
+     4,
+     2
+    ]
+   },
+   {
+    "cell_line": "PC9",
+    "timepoint": "wo_long",
+    "n_genes": 6388,
+    "median_memory": 0.57953,
+    "q25": 0.45198,
+    "q75": 0.72647,
+    "hist": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     2,
+     4,
+     7,
+     18,
+     31,
+     47,
+     127,
+     294,
+     601,
+     1036,
+     1262,
+     1108,
+     880,
+     516,
+     243,
+     102,
+     56,
+     19,
+     19,
+     3,
+     6,
+     2,
+     3,
+     0,
+     0
+    ]
+   }
+  ],
+  "decay": {
+   "H1975": {
+    "long_washout_days": 3.0,
+    "status": "fitted",
+    "n_genes": 2760,
+    "median_half_life_days": 16.89734,
+    "iqr": [
+     8.88467,
+     36.99887
+    ]
+   },
+   "HCC2935": {
+    "long_washout_days": 10.0,
+    "status": "fitted",
+    "n_genes": 3106,
+    "median_half_life_days": 19.41691,
+    "iqr": [
+     10.22142,
+     43.91263
+    ]
+   },
+   "HCC827": {
+    "long_washout_days": 4.0,
+    "status": "fitted",
+    "n_genes": 2450,
+    "median_half_life_days": 22.22389,
+    "iqr": [
+     10.90887,
+     50.04836
+    ]
+   },
+   "PC9": {
+    "long_washout_days": 7.0,
+    "status": "fitted",
+    "n_genes": 6084,
+    "median_half_life_days": 8.35587,
+    "iqr": [
+     5.85383,
+     13.50574
+    ]
+   }
+  }
+ }
+}

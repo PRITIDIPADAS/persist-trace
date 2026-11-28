@@ -1,0 +1,6 @@
+accession,role,url,path,bytes,sha256,retrieved_utc
+GSE335846,external_validation,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE335nnn/GSE335846/suppl/GSE335846_RNA-seq_for_GEO.txt.gz,build/raw/external/GSE335846_RNA-seq_for_GEO.txt.gz,4632231,4ceb24565f8c18e92121bf5d3746b47755b356a3829efdc3b6d116dd5dbc8c51,2026-11-28T08:50:48+00:00
+GSE275199,external_validation,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE275nnn/GSE275199/suppl/GSE275199_features.tsv.gz,build/raw/external/GSE275199_features.tsv.gz,333437,b11578b7a769f17abe68edd1b55a4594c0c1feb78111399bce74f7cc0f121b04,2026-11-28T08:50:48+00:00
+GSE275199,external_validation,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE275nnn/GSE275199/suppl/GSE275199_barcodes.tsv.gz,build/raw/external/GSE275199_barcodes.tsv.gz,36254,48387f8084d729e1670ce8ed747e31e9b6abc83af814f4901d68c524f721c12d,2026-11-28T08:50:48+00:00
+GSE275199,external_validation,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE275nnn/GSE275199/suppl/GSE275199_matrix.mtx.gz,build/raw/external/GSE275199_matrix.mtx.gz,199937552,e9c1eda1cfc6703017d02ecd04171fd03dba989b4ecaf56e7aa4386c2777207f,2026-11-28T08:50:56+00:00
+GSE243562,external_validation,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE243nnn/GSE243562/suppl/GSE243562_RAW.tar,build/raw/external/GSE243562_RAW.tar,207462400,1b3185633cb6be49550891634385e90760b716b395b87b4ddfdcb5b8fed71870,2026-11-28T08:52:22+00:00

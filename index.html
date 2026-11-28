@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PersistTrace · the cancer cells that survive osimertinib</title>
+<meta name="description" content="PersistTrace separates drug stress from the persister state in EGFR-mutant lung cancer, measures what the cells remember after the drug is gone, and shows the evidence behind every gene. Built on 60 public RNA-seq samples, tested in single cells and patient-derived tumours.">
+<meta property="og:title" content="PersistTrace">
+<meta property="og:description" content="The tumour shrinks. Some cancer cells survive. What are they becoming?">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%239e2a3a' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%231c1a16'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/EBGaramond.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="banner" id="banner"></div>
+
+<header class="runhead" id="runhead">
+  <a class="mark" href="#top">Persist<i>Trace</i></a>
+  <nav aria-label="Plates" id="platenav"></nav>
+  <a class="gh" href="https://github.com/PRITIDIPADAS/persist-trace">Source</a>
+</header>
+
+<main id="main">
+
+<section class="hero night" id="top">
+  <div class="hero-grid">
+    <div class="hero-text">
+      <p class="kicker">A computational study of drug-tolerant persister cells · EGFR-mutant lung cancer · osimertinib</p>
+      <h1>The tumour shrinks.<br>Some cancer cells survive.<br><em>What are they becoming?</em></h1>
+      <p class="lede">Lung cancer cells can outlast osimertinib without a single new mutation. They change state. PersistTrace reads 60 public RNA-seq experiments, removes the part that is only day-one drug stress, measures how long the cells remember the drug, and then checks its answers in single cells and in patient-derived tumours.</p>
+      <p class="byline">Pritidipa Das</p>
+    </div>
+    <figure class="stage">
+      <canvas id="heroCanvas" aria-label="The 60 real samples moving through the five conditions"></canvas>
+      <div id="heroPhase" class="phase-tag"></div>
+      <figcaption>
+        <span id="heroCap" class="cap">loading the data</span>
+        <button class="ghost" id="heroPlay" aria-pressed="true">pause</button>
+      </figcaption>
+    </figure>
+  </div>
+  <div class="ledger" id="ledger" aria-live="polite"></div>
+  <div class="plates-index">
+    <p class="smallcaps">Index of plates</p>
+    <ol id="plateIndex"></ol>
+  </div>
+</section>
+
+<section class="plate" id="problem" data-plate="I" data-title="The problem">
+  <header class="plate-head">
+    <p class="plate-no">Plate I</p>
+    <h2>Two and a half million people a year, and a drug that works until it doesn't</h2>
+    <p class="dek">Lung cancer is the most common cancer and the deadliest. About a third of non-small-cell cases carry an EGFR mutation. Osimertinib shrinks most of these tumours, yet in the FLAURA trial the median time to progression was 18.9 months. The cells that survive the first months are where relapse starts.</p>
+  </header>
+  <div class="plate-body two">
+    <div>
+      <figure class="fig">
+        <canvas id="dotField" aria-label="One dot per ten thousand lung cancer diagnoses in 2022"></canvas>
+        <figcaption><b>Fig. 1</b> One dot is 10,000 people diagnosed with lung cancer in 2022. <span class="k k-ink">Grey</span> all lung cancer, <span class="k k-blue">blue</span> non-small-cell, <span class="k k-red">red</span> an estimate of EGFR-mutant cases (85% NSCLC × 32.3% pooled EGFR prevalence; prevalence ranges from 14% in Europe to 38% in China).</figcaption>
+      </figure>
+      <div class="stats-row" id="problemStats"></div>
+    </div>
+    <aside class="margin">
+      <figure class="photo">
+        <img src="media/histology.jpg" alt="Micrograph of mucinous lung adenocarcinoma stained with haematoxylin and eosin" loading="lazy" onerror="this.closest('figure').remove()">
+        <figcaption>Mucinous lung adenocarcinoma beside an airway, H&amp;E stain. Photo: Nephron, Wikimedia Commons, CC BY-SA 4.0.</figcaption>
+      </figure>
+      <p class="note"><b>Who is affected.</b> People with EGFR-mutant lung adenocarcinoma, many of whom never smoked. EGFR mutations are found more often in women (43.7%) than men (24.0%), and in non-smokers (49.3%).</p>
+      <p class="note"><b>Who would use this.</b> Cancer biology and translational labs deciding which persister genes to test next. Today they compare treated with untreated cells and pick the biggest fold changes, which mixes drug stress with the persister state.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="plate night" id="drug" data-plate="II" data-title="Drug and target">
+  <header class="plate-head">
+    <p class="plate-no">Plate II</p>
+    <h2>The drug locks onto EGFR. The persister survives anyway.</h2>
+    <p class="dek">Osimertinib binds the ATP pocket of EGFR and is irreversible: its acrylamide tail reacts with cysteine 797. Mutations at that cysteine (C797S) are one known escape route. Persisters use no mutation at all, which is why they need a different kind of analysis.</p>
+  </header>
+  <div class="plate-body two">
+    <figure class="fig">
+      <div id="mol3d" class="mol3d" role="img" aria-label="3D structure of EGFR kinase with osimertinib, PDB 4ZAU"></div>
+      <figcaption><b>Fig. 2</b> Crystal structure of the EGFR kinase domain with osimertinib (AZD9291), PDB 4ZAU, drawn live with 3Dmol.js. Drug in <span class="k k-red">red</span>, Cys797 in <span class="k k-gold">gold</span>. In this crystal the acrylamide carbon sits <b>3.4 Å</b> from the cysteine sulfur, measured by this project from the PDB file. Drag to rotate.</figcaption>
+    </figure>
+    <aside class="margin">
+      <figure class="fig">
+        <img src="media/osimertinib.svg" alt="2D structure of osimertinib with the acrylamide warhead highlighted" class="mol2d">
+        <figcaption><b>Fig. 3</b> Osimertinib, C₂₈H₃₃N₇O₂, 499.6 Da (ChEMBL CHEMBL3353410). The shaded group is the acrylamide warhead. Drawn with RDKit from the ChEMBL SMILES.</figcaption>
+      </figure>
+      <p class="note"><b>Why a non-genetic problem needs AI.</b> There is no mutation to sequence. The signal is spread across thousands of genes, mixed with stress, and changes over weeks. Separating it needs statistical models across many samples, not a single lab test.</p>
+    </aside>
+  </div>
+</section>
+
+<section class="plate" id="design" data-plate="III" data-title="Experiment">
+  <header class="plate-head">
+    <p class="plate-no">Plate III</p>
+    <h2>Five moments in a cancer cell's encounter with the drug</h2>
+    <p class="dek">The primary data are 60 RNA-seq samples from Criscione et al. (2022): four EGFR-mutant cell lines, three replicates, five conditions. The same design lets us ask what is stress, what is persistence and what fades.</p>
+  </header>
+  <figure class="fig wide">
+    <svg id="timeline" class="chart" viewBox="0 0 1200 260" role="img" aria-label="Timeline of the five conditions"></svg>
+    <figcaption><b>Fig. 4</b> The five conditions. Long washouts were set by regrowth and read from the GEO records: H1975 3 days, HCC827 4, PC9 7, HCC2935 10.</figcaption>
+  </figure>
+  <div class="journey">
+    <p class="smallcaps">How a researcher uses it</p>
+    <ol>
+      <li><b>Load</b> the public data. One command downloads GEO files and records their checksums.</li>
+      <li><b>Separate</b> stress from persistence for every gene in every line.</li>
+      <li><b>Follow</b> each change into the washout and measure its memory.</li>
+      <li><b>Check</b> the result in single cells and patient-derived tumours.</li>
+      <li><b>Read the passport</b> before choosing which gene to test in the lab.</li>
+    </ol>
+  </div>
+  <figure class="fig wide video"><video id="explainer" controls muted playsinline preload="none" poster="media/explainer.jpg" src="media/explainer.mp4"></video><figcaption><b>Film.</b> The whole project in 56 seconds. Every number and point on screen is read from the published results file, rendered with matplotlib and ffmpeg by <code>persisttrace/film.py</code>.</figcaption></figure>
+</section>
+
+<section class="plate" id="universe" data-plate="IV" data-title="Cell states">
+  <header class="plate-head">
+    <p class="plate-no">Plate IV</p>
+    <h2>Every sample on one map</h2>
+    <p class="dek">Principal components of the 2,000 most variable genes. Centred within each cell line, the treatment conditions line up across lines. Raw, the lines sit far apart. Hover a point for its GEO accession.</p>
+  </header>
+  <div class="toolbar" id="uniTools"></div>
+  <figure class="fig wide"><svg class="chart" id="uniChart" viewBox="0 0 1100 520" role="img" aria-label="Sample embedding"></svg><figcaption id="uniLegend"></figcaption></figure>
+</section>
+
+<section class="plate" id="decompose" data-plate="V" data-title="Decomposition">
+  <header class="plate-head">
+    <p class="plate-no">Plate V</p>
+    <h2>Subtract the stress. Keep the persister.</h2>
+    <p class="dek">For each gene the persister change P is split into what the 24-hour response predicts, β·A, and what it does not, S. One robust slope per cell line, then a random-effects meta-analysis across the four lines.</p>
+  </header>
+  <div class="equation" aria-label="P equals beta times A plus S">
+    <math display="block"><mrow><msub><mi>P</mi><mi>g</mi></msub><mo>=</mo><mi>β</mi><mo>·</mo><msub><mi>A</mi><mi>g</mi></msub><mo>+</mo><msub><mi>S</mi><mi>g</mi></msub><mspace width="2.5em"/><msub><mi>z</mi><mi>S</mi></msub><mo>=</mo><mfrac><msub><mi>S</mi><mi>g</mi></msub><msqrt><msubsup><mi>σ</mi><mi>P</mi><mn>2</mn></msubsup><mo>+</mo><msup><mi>β</mi><mn>2</mn></msup><msubsup><mi>σ</mi><mi>A</mi><mn>2</mn></msubsup></msqrt></mfrac></mrow></math>
+  </div>
+  <div class="toolbar" id="decTools"></div>
+  <div class="plate-body two">
+    <figure class="fig"><svg class="chart" id="decChart" viewBox="0 0 640 470" role="img" aria-label="Acute against persister fold change"></svg><figcaption><b>Fig. 5</b> Each point is a gene. The gold line is β·A, the stress the persisters still carry. Coloured points changed for reasons stress does not explain.</figcaption></figure>
+    <aside class="margin"><p class="note" id="betaText"></p><p class="smallcaps">Top persister-specific genes</p><div id="decTop"></div></aside>
+  </div>
+</section>
+
+<section class="plate" id="reversibility" data-plate="VI" data-title="Memory">
+  <header class="plate-head">
+    <p class="plate-no">Plate VI</p>
+    <h2>The cells remember the drug for weeks</h2>
+    <p class="dek">Memory is the share of a persister change still present after washout. Where the regrowth day is known, an exponential fit gives a half-life. These are population averages: a return to baseline fits reversal, and it also fits other cells outgrowing the persisters.</p>
+  </header>
+  <div class="plate-body two">
+    <figure class="fig">
+      <div class="toolbar"><label for="geneSearch" class="smallcaps">Gene</label><input type="search" id="geneSearch" list="geneList" placeholder="try TACSTD2, CDK6, KCNH1" autocomplete="off"><datalist id="geneList"></datalist><span id="geneClass"></span></div>
+      <svg class="chart" id="revChart" viewBox="0 0 640 380" role="img" aria-label="Gene trajectory across conditions"></svg>
+      <figcaption id="revLegend"></figcaption>
+    </figure>
+    <aside class="margin">
+      <p class="note" id="memText"></p>
+      <svg class="chart" id="memChart" viewBox="0 0 460 290" role="img" aria-label="Memory distribution"></svg>
+      <p class="smallcaps">Withdrawal classes, reproducible in 3 of 4 lines</p>
+      <div id="classBars"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="plate" id="paradox" data-plate="VII" data-title="Replication">
+  <header class="plate-head">
+    <p class="plate-no">Plate VII</p>
+    <h2>Asleep, or quietly copying DNA?</h2>
+    <p class="dek">Persisters are often called dormant. In bulk data, proliferation genes crash after 24 hours and then partly come back while the drug is still on. A 2026 dataset of PC9 persisters sorted by cell-cycle phase lets us ask whether the cycling ones carry the persister programme too.</p>
+  </header>
+  <div class="toolbar" id="progTools"></div>
+  <div class="plate-body two">
+    <figure class="fig"><svg class="chart" id="progChart" viewBox="0 0 640 380" role="img" aria-label="Programme scores over conditions"></svg><figcaption id="progLegend"></figcaption></figure>
+    <aside class="margin"><div id="progLit"></div><p class="smallcaps">Programmes shifted beyond stress</p><div id="progTable"></div></aside>
+  </div>
+  <figure class="fig wide"><svg class="chart" id="ccChart" viewBox="0 0 1100 300" role="img" aria-label="Persister score by cell-cycle phase"></svg><figcaption id="ccCap"></figcaption></figure>
+</section>
+
+<section class="plate night" id="singlecell" data-plate="VIII" data-title="Single cells">
+  <header class="plate-head">
+    <p class="plate-no">Plate VIII</p>
+    <h2>Beyond the dish average: single cells and real tumours</h2>
+    <p class="dek">The signatures were frozen from the four cell lines, then scored in two datasets they had never seen: PC9 single cells under osimertinib (GSE275199) and tumour cells from patient-derived xenografts before and after six weeks of treatment (GSE243562).</p>
+  </header>
+  <div class="toolbar" id="scTools"></div>
+  <div class="plate-body two">
+    <figure class="fig"><canvas id="scCanvas" class="sc" aria-label="UMAP of single cells"></canvas><figcaption id="scCap"></figcaption></figure>
+    <aside class="margin" id="scNotes"></aside>
+  </div>
+</section>
+
+<section class="plate" id="graph" data-plate="IX" data-title="Escape graph">
+  <header class="plate-head">
+    <p class="plate-no">Plate IX</p>
+    <h2>Every line on this graph says where it came from</h2>
+    <p class="dek">Genes, regulators, programmes and published studies. Solid lines were measured or reported, dashed lines were inferred. A computer guess and a lab experiment never look the same. Click a gene to open its passport.</p>
+  </header>
+  <div class="toolbar" id="graphTools"></div>
+  <figure class="fig wide"><svg class="chart" id="graphSvg" viewBox="0 0 1000 640" role="img" aria-label="Evidence graph"></svg><figcaption id="graphLegend"></figcaption></figure>
+</section>
+
+<section class="plate" id="passport" data-plate="X" data-title="Passports">
+  <header class="plate-head">
+    <p class="plate-no">Plate X</p>
+    <h2>Marker or mechanism? Six separate answers and no secret score</h2>
+    <p class="dek">The label at the top is the strongest claim the evidence allows, chosen by written rules. Contradictions are listed, not averaged away.</p>
+  </header>
+  <div class="story" id="trop2Plain"><b>Start with TROP2.</b> A 2025 knockout study found it was not needed for persister formation. A 2026 study reported that it helps persisters survive. Both can be true in different set-ups.</div>
+  <div class="toolbar"><button class="ghost" id="trapBtn">open TROP2</button><label for="claimFilter" class="smallcaps">Filter</label><select id="claimFilter"><option value="">all labels</option></select></div>
+  <div class="passport"><div class="plist" id="plist" role="listbox" aria-label="Candidate genes"></div><article class="pcard" id="pcard"></article></div>
+</section>
+
+<section class="plate" id="arena" data-plate="XI" data-title="Validation">
+  <header class="plate-head">
+    <p class="plate-no">Plate XI</p>
+    <h2>Tested on a cell line the model never saw</h2>
+    <p class="dek">Signatures and models are built on three lines and scored on the fourth. Hypotheses H1 to H6 were committed to GitHub before the first real run; later additions are marked post hoc. Failures stay on the page.</p>
+  </header>
+  <div class="plate-body two">
+    <div id="hyps"></div>
+    <aside class="margin"><figure class="fig"><svg class="chart" id="foldChart" viewBox="0 0 460 290" role="img" aria-label="AUROC per held-out line"></svg><figcaption>Persisters against 24-hour samples in the held-out line. <span class="k k-gold">Gold</span> naive signature, <span class="k k-red">red</span> persister-specific.</figcaption></figure></aside>
+  </div>
+  <figure class="fig wide"><div id="benchTable"></div></figure>
+</section>
+
+<section class="plate night" id="math" data-plate="XII" data-title="Mathematics">
+  <header class="plate-head">
+    <p class="plate-no">Plate XII</p>
+    <h2>Why a reversible state is enough for relapse</h2>
+    <p class="dek">Two populations, sensitive S and persister P, switching at rates that depend on the drug. The largest eigenvalue of the rate matrix decides whether the tumour grows. The rates are illustrative; the same model runs in Python, JavaScript and Octave, and CI checks that Python and Octave agree.</p>
+  </header>
+  <div class="equation">
+    <math display="block"><mrow><mfrac><mi>d</mi><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mrow><mo>[</mo><mtable><mtr><mtd><mi>S</mi></mtd></mtr><mtr><mtd><mi>P</mi></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msub><mi>r</mi><mi>S</mi></msub><mo>−</mo><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>a</mi></mtd><mtd><msub><mi>r</mi><mi>P</mi></msub><mo>−</mo><mi>b</mi></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mi>S</mi></mtd></mtr><mtr><mtd><mi>P</mi></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="2.5em"/><msub><mi>λ</mi><mo>max</mo></msub><mo>=</mo><mfrac><mrow><mi>τ</mi><mo>+</mo><msqrt><msup><mi>τ</mi><mn>2</mn></msup><mo>−</mo><mn>4</mn><mi>Δ</mi></msqrt></mrow><mn>2</mn></mfrac><mspace width="2.5em"/><mi>m</mi><mo>(</mo><mi>t</mi><mo>)</mo><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>k</mi><mi>t</mi></mrow></msup></mrow></math>
+  </div>
+  <div class="plate-body two">
+    <figure class="fig"><svg class="chart" id="modelChart" viewBox="0 0 640 360" role="img" aria-label="Simulated population"></svg><figcaption><span class="k k-blue">Sensitive</span>, <span class="k k-red">persister</span>, total in ivory. Log scale.</figcaption></figure>
+    <aside class="margin" id="modelControls"></aside>
+  </div>
+</section>
+
+<section class="plate" id="methods" data-plate="XIII" data-title="Methods">
+  <header class="plate-head">
+    <p class="plate-no">Plate XIII</p>
+    <h2>Rerun every number yourself</h2>
+    <p class="dek">One command downloads the public files, records their checksums, runs the analysis and writes this page. GitHub Actions repeats it on every change, with the test suite and the Octave cross-check.</p>
+  </header>
+  <pre class="code"><code>pip install -r requirements.txt &amp;&amp; pip install -e .
+python -m persisttrace.pipeline          # GEO download, DESeq2, decomposition, memory, passports, validation
+pytest -q                                 # scientific invariants on synthetic data with known answers
+octave --eval "addpath('matlab'); run_all('build/octave')"</code></pre>
+  <div class="plate-body three">
+    <div><p class="smallcaps">Acceptance gates</p><div id="gates"></div><p class="smallcaps">Robustness</p><p class="note" id="robust"></p></div>
+    <div><p class="smallcaps">Source files and checksums</p><div id="manifest" class="scroller"></div><p class="note" id="runinfo"></p></div>
+    <div><p class="smallcaps">What does not work yet</p><ul class="plainlist" id="limits"></ul><p class="smallcaps">Literature</p><div id="refs" class="refs"></div></div>
+  </div>
+  <figure class="fig wide video"><video id="trajVideo" controls muted playsinline preload="none"></video><figcaption><b>Film.</b> The real sample coordinates, rendered by the pipeline.</figcaption></figure>
+</section>
+</main>
+
+<footer class="colophon night">
+  <p class="boundary">PersistTrace is a computational research framework for cell-line and xenograft models of EGFR-mutant non-small-cell lung cancer treated with osimertinib. It does not diagnose patients, recommend treatment or replace laboratory validation.</p>
+  <p>Pritidipa Das · Healthcare, patient care. Data: NCBI GEO GSE193258, GSE275199, GSE243562, GSE335846; RCSB PDB 4ZAU; ChEMBL. Set in Centaur, Californian FB and Garamond. <a href="https://github.com/PRITIDIPADAS/persist-trace">github.com/PRITIDIPADAS/persist-trace</a></p>
+</footer>
+<div class="tip" id="tip" role="tooltip"></div>
+<script src="js/charts.js"></script>
+<script src="js/hero.js"></script>
+<script src="js/vendor-3Dmol-min.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
